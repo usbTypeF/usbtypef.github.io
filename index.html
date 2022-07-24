@@ -2,14 +2,14 @@
 	<head>
 		<title>Currency Game</title>
   
-		<link rel="icon" type="image/png" href="icon.png">
+		<link rel="icon" type="image/png" id="icon" href="icon.png">
   
 		<link rel="stylesheet" href="style.css">		
 	</head>
 
-    
-
 	<body>
+        <canvas id="mouse" onmousemove="updatemouse()"></canvas>
+
         <div id="number">0</div>
         <button onclick="asdf()">number</button>
         <canvas id="canvas"></canvas>
