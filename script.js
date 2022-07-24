@@ -29,6 +29,9 @@ function updatemouse()
     var y = event.clientY;
     ctx.beginPath();
     ctx.arc(x, y, 15, 0, 2 * Math.PI);
+    ctx.fillStyle = "grey";
+    ctx.fill();
+    ctx.lineWidth = 2;
     ctx.stroke();
 }
 
