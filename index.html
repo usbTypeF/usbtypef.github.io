@@ -8,11 +8,30 @@
 	</head>
 
 	<body>
-        <canvas id="mouse" onmousemove="updatemouse()"></canvas>
+        <div id="left-panel" class="panel" onclick="add();">
+            <a id="test2">Loading...</a>
+        </div>
 
-        <div id="number">0</div>
-        <button onclick="asdf()">number</button>
-        <canvas id="canvas"></canvas>
+        <div id="right-panel" class="panel" onclick="big();">
+            <a id="test3">Loading...</a>
+        </div>
+
+        <div id="top-panel" class="panel">
+            <a id="test">Loading...</a>
+        </div>
+
+        <div id="bottom-panel" class="panel">
+            <a id="test4">Loading...</a>
+        </div>
+
+        <div id="center-panel" class="panel" onclick="asdf();"></div>
+
+        <div id="borders">
+            <div id="left-border"></div>
+            <div id="right-border"></div>
+            <div id="top-border"></div>
+            <div id="bottom-border"></div>
+        </div>
 	</body>
 
 	<script src="script.js"></script>
