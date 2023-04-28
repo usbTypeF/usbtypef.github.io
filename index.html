@@ -50,41 +50,6 @@
 	</body>
 
     <script>
-		// Get the view count from the counter.txt file
-		var xhr = new XMLHttpRequest();
-		xhr.open('GET', 'counter.txt', true);
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState === 4 && xhr.status === 200) {
-				var count = parseInt(xhr.responseText);
-				document.getElementById('viewCount').innerHTML = 'This page has been viewed ' + count + ' times.';
-			}
-		};
-		xhr.send();
-
-		// Increment the view count and update the counter.txt file
-		var count = 0;
-		var xhr2 = new XMLHttpRequest();
-		xhr2.open('GET', 'counter.txt', true);
-		xhr2.onreadystatechange = function() {
-			if (xhr2.readyState === 4 && xhr2.status === 200) {
-				count = parseInt(xhr2.responseText);
-			}
-		};
-		xhr2.send();
-
-		window.addEventListener('beforeunload', function() {
-		count++;
-		var xhr3 = new XMLHttpRequest();
-		xhr3.open('PUT', 'counter.txt', true);
-		xhr3.setRequestHeader('Content-type', 'text/plain');
-		xhr3.onreadystatechange = function() {
-			if (xhr3.readyState === 4 && xhr3.status === 200) {
-				console.log('View count updated.');
-			}
-		};
-		xhr3.send(count.toString());
-		});
-	
 		function startTest() {
 			document.getElementById("trialCount").innerHTML = "Trials: 0";
 			document.getElementById("startTestButton").style.display = "none";
