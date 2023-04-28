@@ -9,4 +9,6 @@ if (file_exists($counter_file)) {
 }
 
 file_put_contents($counter_file, $count);
+
+echo "This page has been viewed $count times!";
 ?>
