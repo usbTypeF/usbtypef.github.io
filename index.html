@@ -192,13 +192,13 @@
 				file = 1;
 			}
 
-			if(count > 14){
+			if(count > 15){
 				if(correct/count > 0.7) {
 					document.getElementById("score").innerHTML = "There is a " + (10 * Math.sqrt((correct/count - 0.5)*200)).toFixed(2) + " percent chance you can tell between " + selectedAudio + " and " + audioFiles[document.getElementById("selectTest").selectedIndex][1];
-				}	
-			} else if (count > 14) {
-				document.getElementById("score").innerHTML = "You cannot reliably tell between " + selectedAudio + " and " + audioFiles[document.getElementById("selectTest").selectedIndex][1];
-			} else {
+				}	else {
+					document.getElementById("score").innerHTML = "You cannot reliably tell between " + selectedAudio + " and " + audioFiles[document.getElementById("selectTest").selectedIndex][1];
+				}
+			} else  {
 				document.getElementById("score").innerHTML = "You did not complete enough trials to get a score";
 			}
 		}
