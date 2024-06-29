@@ -1,0 +1,156 @@
+<html><head><base href="https://websim.ai"><title>Dreamic's Rage Incremental</title><style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  .container {
+    max-width: 800px;
+    width: 100%;
+  }
+  h1, h2 {
+    color: #ff4d4d;
+    text-align: center;
+  }
+  .stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    background-color: #2a2a2a;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  .stat {
+    text-align: center;
+  }
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  button {
+    background-color: #3a3a3a;
+    color: #e0e0e0;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+  }
+  button:hover {
+    background-color: #4a4a4a;
+  }
+  button:disabled {
+    background-color: #2a2a2a;
+    cursor: not-allowed;
+  }
+  .ascend {
+    grid-column: span 2;
+    background-color: #ff4d4d;
+    color: #1a1a1a;
+    font-weight: bold;
+  }
+  .ascend:hover {
+    background-color: #ff6666;
+  }
+  .upgrades {
+    margin-top: 20px;
+    background-color: #2a2a2a;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  .upgrade {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .upgrade button {
+    background-color: #3a3a3a;
+  }
+  .upgrade button:hover {
+    background-color: #4a4a4a;
+  }
+</style></head><body><div class="container"><h1>Dreamic's Rage Incremental</h1><div class="stats"><div class="stat"><h2>Rage</h2><p id="rage">0</p></div><div class="stat"><h2>Rage per Second</h2><p id="ragePerSecond">0</p></div><div class="stat"><h2>Ascensions</h2><p id="ascensions">0</p></div></div><div class="buttons"><button id="clickRage">Generate Rage</button><button id="ascend" class="ascend" disabled>Ascend (Requires 1000 Rage)</button></div><div class="upgrades"><h2>Upgrades</h2><div class="upgrade"><span>Auto-Clicker (Cost: <span id="autoClickerCost">10</span> Rage)</span><button id="buyAutoClicker">Buy</button></div><div class="upgrade"><span>Rage Multiplier (Cost: <span id="rageMultiplierCost">50</span> Rage)</span><button id="buyRageMultiplier">Buy</button></div><div class="upgrade"><span>Ascension Boost (Cost: <span id="ascensionBoostCost">5</span> Ascensions)</span><button id="buyAscensionBoost">Buy</button></div></div></div><script>
+  let rage = 0;
+  let ragePerSecond = 0;
+  let ascensions = 0;
+  let autoClickers = 0;
+  let rageMultiplier = 1;
+  let ascensionBoost = 1;
+  let autoClickerCost = 10;
+  let rageMultiplierCost = 50;
+  let ascensionBoostCost = 5;
+
+  function updateDisplay() {
+    document.getElementById('rage').textContent = Math.floor(rage);
+    document.getElementById('ragePerSecond').textContent = (ragePerSecond * rageMultiplier * ascensionBoost).toFixed(1);
+    document.getElementById('ascensions').textContent = ascensions;
+    document.getElementById('ascend').disabled = rage < 1000;
+    document.getElementById('autoClickerCost').textContent = autoClickerCost;
+    document.getElementById('rageMultiplierCost').textContent = rageMultiplierCost;
+    document.getElementById('ascensionBoostCost').textContent = ascensionBoostCost;
+    document.getElementById('buyAutoClicker').disabled = rage < autoClickerCost;
+    document.getElementById('buyRageMultiplier').disabled = rage < rageMultiplierCost;
+    document.getElementById('buyAscensionBoost').disabled = ascensions < ascensionBoostCost;
+  }
+
+  document.getElementById('clickRage').addEventListener('click', () => {
+    rage += 1 * rageMultiplier * ascensionBoost;
+    updateDisplay();
+  });
+
+  document.getElementById('ascend').addEventListener('click', () => {
+    if (rage >= 1000) {
+      ascensions++;
+      rage = 0;
+      ragePerSecond = 0;
+      autoClickers = 0;
+      rageMultiplier = 1;
+      autoClickerCost = 10;
+      rageMultiplierCost = 50;
+      updateDisplay();
+    }
+  });
+
+  document.getElementById('buyAutoClicker').addEventListener('click', () => {
+    if (rage >= autoClickerCost) {
+      rage -= autoClickerCost;
+      autoClickers++;
+      ragePerSecond += 0.1;
+      autoClickerCost = Math.ceil(autoClickerCost * 1.15);
+      updateDisplay();
+    }
+  });
+
+  document.getElementById('buyRageMultiplier').addEventListener('click', () => {
+    if (rage >= rageMultiplierCost) {
+      rage -= rageMultiplierCost;
+      rageMultiplier *= 1.2;
+      rageMultiplierCost = Math.ceil(rageMultiplierCost * 1.5);
+      updateDisplay();
+    }
+  });
+
+  document.getElementById('buyAscensionBoost').addEventListener('click', () => {
+    if (ascensions >= ascensionBoostCost) {
+      ascensions -= ascensionBoostCost;
+      ascensionBoost *= 1.5;
+      ascensionBoostCost = Math.ceil(ascensionBoostCost * 1.5);
+      updateDisplay();
+    }
+  });
+
+  setInterval(() => {
+    rage += ragePerSecond * rageMultiplier * ascensionBoost;
+    updateDisplay();
+  }, 1000);
+
+  updateDisplay();
+</script></body></html>
