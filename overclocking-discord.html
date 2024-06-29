@@ -1,0 +1,434 @@
+<html><head><base href="https://discord.sim/overclocking"><title>Discord - Overclockers United</title>
+<style>
+  body { 
+    font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #36393f;
+    color: #dcddde;
+  }
+  .app {
+    display: flex;
+    height: 100vh;
+  }
+  .channels {
+    width: 240px;
+    background-color: #2f3136;
+    padding: 20px;
+  }
+  .channel {
+    cursor: pointer;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+  }
+  .channel:hover {
+    background-color: #42464d;
+  }
+  .channel.active {
+    background-color: #42464d;
+    color: #fff;
+  }
+  .chat {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .messages {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  .message {
+    margin-bottom: 20px;
+  }
+  .message-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    background-color: #4f545c;
+  }
+  .username {
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  .timestamp {
+    color: #72767d;
+    font-size: 0.8em;
+  }
+  .message-content {
+    line-height: 1.4;
+  }
+  .input-area {
+    padding: 20px;
+    background-color: #40444b;
+  }
+  input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #40444b;
+    color: #dcddde;
+  }
+  input:focus {
+    outline: none;
+  }
+  .pinned-message {
+    background-color: #4f545c;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 20px;
+  }
+  .reply {
+    margin-left: 20px;
+    border-left: 2px solid #4f545c;
+    padding-left: 10px;
+  }
+  code {
+    background-color: #2f3136;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Courier New', monospace;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="channels">
+    <h3>Overclockers United</h3>
+    <div class="channel active"># general</div>
+    <div class="channel"># cpu-overclocking</div>
+    <div class="channel"># gpu-tuning</div>
+    <div class="channel"># ram-tweaking</div>
+    <div class="channel"># cooling-solutions</div>
+    <div class="channel"># benchmarks</div>
+    <div class="channel"># troubleshooting</div>
+  </div>
+  <div class="chat">
+    <div id="messages" class="messages">
+      <div class="pinned-message">
+        <strong>Pinned by Moderator:</strong> Welcome to Overclockers United! Please remember to always use safe voltages and temperatures. Share your specs, ask questions, and happy overclocking!
+      </div>
+      <!-- Messages will be dynamically added here -->
+    </div>
+    <div class="input-area">
+      <input type="text" placeholder="Message #general">
+    </div>
+  </div>
+</div>
+
+<script>
+const users = [
+  {name: "VoltageVoyager", avatar: "⚡"},
+  {name: "ClockMaster", avatar: "🕰️"},
+  {name: "ThermalThrottler", avatar: "🌡️"},
+  {name: "RAMRaider", avatar: "💾"},
+  {name: "SiliconSurfer", avatar: "🏄"},
+  {name: "BIOSBender", avatar: "💻"},
+  {name: "WattWizard", avatar: "🧙"},
+  {name: "CoolingCrusader", avatar: "❄️"},
+  {name: "OverclockNewbie", avatar: "🐣"},
+  {name: "ExtremeTweaker", avatar: "🔧"},
+];
+
+const topics = [
+  "CPU overclocking",
+  "GPU tuning",
+  "RAM tweaking",
+  "cooling solutions",
+  "BIOS settings",
+  "benchmark scores",
+  "stability testing",
+  "power consumption",
+  "silicon lottery",
+  "thermal paste application",
+  "gaming performance",
+];
+
+const games = [
+  "Cyberpunk 2077", "Elden Ring", "Red Dead Redemption 2", "Control", "Metro Exodus",
+  "Doom Eternal", "Fortnite", "Apex Legends", "Call of Duty: Warzone", "Assassin's Creed Valhalla",
+  "The Witcher 3", "Grand Theft Auto V", "Minecraft", "Overwatch", "League of Legends",
+  "World of Warcraft", "Counter-Strike: Global Offensive", "Dota 2", "PlayerUnknown's Battlegrounds",
+  "Rainbow Six Siege", "Rocket League", "Among Us", "Fall Guys", "Valorant",
+  "Hades", "Stardew Valley", "Civilization VI", "The Elder Scrolls V: Skyrim", "Portal 2",
+  "Half-Life 2", "BioShock", "Mass Effect 2", "Dark Souls", "Borderlands 2",
+  "Fallout: New Vegas", "The Last of Us", "God of War", "Red Dead Redemption", "Batman: Arkham City"
+];
+
+const cpus = [
+  "Intel Core i9-12900K", "AMD Ryzen 9 5950X", "Intel Core i7-12700K", "AMD Ryzen 7 5800X",
+  "Intel Core i5-12600K", "AMD Ryzen 5 5600X", "Intel Core i9-11900K", "AMD Ryzen 9 3950X",
+  "Intel Core i7-11700K", "AMD Ryzen 7 3700X", "Intel Core i5-11600K", "AMD Ryzen 5 3600",
+  "Intel Core i9-10900K", "AMD Ryzen 9 3900X", "Intel Core i7-10700K", "AMD Ryzen 7 3800X",
+  "Intel Core i5-10600K", "AMD Ryzen 5 3600X", "Intel Core i9-9900K", "AMD Ryzen 7 2700X",
+  "Intel Core i7-9700K", "AMD Ryzen 5 2600", "Intel Core i5-9600K", "AMD Ryzen 3 3300X",
+  "Intel Core i7-8700K", "AMD Ryzen 7 1800X", "Intel Core i5-8600K", "AMD Ryzen 5 1600",
+  "Intel Core i7-7700K", "AMD Ryzen 7 1700", "Intel Core i5-7600K", "AMD FX-8350",
+  "Intel Core i7-6700K", "AMD FX-6300", "Intel Core i5-6600K", "AMD Phenom II X6 1100T",
+  "Intel Core i7-4790K", "AMD Phenom II X4 965", "Intel Core i5-4690K", "AMD Athlon 64 X2 6000+"
+];
+
+const gpus = [
+  "NVIDIA GeForce RTX 3090", "AMD Radeon RX 6900 XT", "NVIDIA GeForce RTX 3080", "AMD Radeon RX 6800 XT",
+  "NVIDIA GeForce RTX 3070", "AMD Radeon RX 6700 XT", "NVIDIA GeForce RTX 3060 Ti", "AMD Radeon RX 6600 XT",
+  "NVIDIA GeForce RTX 2080 Ti", "AMD Radeon VII", "NVIDIA GeForce RTX 2080 Super", "AMD Radeon RX 5700 XT",
+  "NVIDIA GeForce RTX 2070 Super", "AMD Radeon RX 5700", "NVIDIA GeForce RTX 2060 Super", "AMD Radeon RX 5600 XT",
+  "NVIDIA GeForce GTX 1080 Ti", "AMD Radeon RX Vega 64", "NVIDIA GeForce GTX 1080", "AMD Radeon RX Vega 56",
+  "NVIDIA GeForce GTX 1070 Ti", "AMD Radeon RX 590", "NVIDIA GeForce GTX 1070", "AMD Radeon RX 580",
+  "NVIDIA GeForce GTX 1060", "AMD Radeon RX 570", "NVIDIA GeForce GTX 980 Ti", "AMD Radeon R9 Fury X",
+  "NVIDIA GeForce GTX 980", "AMD Radeon R9 390X", "NVIDIA GeForce GTX 970", "AMD Radeon R9 390",
+  "NVIDIA GeForce GTX 780 Ti", "AMD Radeon R9 290X", "NVIDIA GeForce GTX 780", "AMD Radeon R9 290",
+  "NVIDIA GeForce GTX 770", "AMD Radeon HD 7970", "NVIDIA GeForce GTX 760", "AMD Radeon HD 7950"
+];
+
+function generateMessage(replyTo = null) {
+  const user = users[Math.floor(Math.random() * users.length)];
+  const topic = topics[Math.floor(Math.random() * topics.length)];
+  
+  let content;
+  if (replyTo) {
+    content = generateReply(replyTo);
+  } else {
+    content = generateInitialMessage();
+  }
+
+  return {
+    user: user,
+    content: content,
+    timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+  };
+}
+
+function generateInitialMessage() {
+  const messages = [
+    // Complex message
+    `Just finished a comprehensive stability test on my new ${cpus[Math.floor(Math.random() * cpus.length)]} overclock. Here's the breakdown:
+
+    <code>
+    - BCLK: ${(100 + Math.random() * 5).toFixed(1)} MHz
+    - Effective Clock: ${(4 + Math.random() * 1.5).toFixed(2)} GHz all-core, ${(4.5 + Math.random() * 1).toFixed(2)} GHz single-core
+    - vCore: ${(1.2 + Math.random() * 0.15).toFixed(2)}V (static)
+    - VDDCR SOC: ${(1 + Math.random() * 0.2).toFixed(2)}V
+    - VDDG CCD: ${(0.9 + Math.random() * 0.1).toFixed(2)}V
+    - VDDG IOD: ${(1 + Math.random() * 0.1).toFixed(2)}V
+    - CLDO VDDP: ${(0.85 + Math.random() * 0.1).toFixed(2)}V
+    - PBO: ${Math.random() > 0.5 ? 'Enabled' : 'Disabled'}
+    - C-States: ${Math.random() > 0.5 ? 'Enabled' : 'Disabled'}
+    - Power Limit: ${110 + Math.floor(Math.random() * 40)}W
+    </code>
+
+    Ran Prime95 Small FFTs for ${6 + Math.floor(Math.random() * 6)} hours, OCCT Large for ${3 + Math.floor(Math.random() * 5)} hours, and ${80 + Math.floor(Math.random() * 40)} cycles of Linpack Xtreme. Max temp was ${75 + Math.floor(Math.random() * 15)}°C with a Noctua NH-D15.
+
+    Cinebench R23 scores:
+    - Single Core: ${1500 + Math.floor(Math.random() * 300)} (up from ${1400 + Math.floor(Math.random() * 200)} stock)
+    - Multi Core: ${14000 + Math.floor(Math.random() * 3000)} (up from ${13000 + Math.floor(Math.random() * 2000)} stock)
+
+    3DMark CPU Profile:
+    - Max Threads: ${6500 + Math.floor(Math.random() * 500)} (up from ${6000 + Math.floor(Math.random() * 500)})
+    - Single Thread: ${1000 + Math.floor(Math.random() * 150)} (up from ${950 + Math.floor(Math.random() * 100)})
+
+    Any suggestions for further tweaking or additional stability tests?`,
+
+    // Simple message
+    `Hey everyone, I'm new to overclocking. Just got my first gaming PC with a ${cpus[Math.floor(Math.random() * cpus.length)]}. Any tips on where to start?`,
+
+    // Medium complexity
+    `Check out my custom loop for my ${gpus[Math.floor(Math.random() * gpus.length)]}! 🔥
+    
+    Specs:
+    - EK-Quantum Vector² FE D-RGB - Silver Special Edition
+    - EK-Quantum Surface P360M
+    - EK-Quantum Kinetic FLT 240 D5 PWM D-RGB
+    - EK-Tube ZMT Matte Black 16/10 mm
+    - Kryonaut Extreme for thermal paste
+
+    Dropped load temps by ${20 + Math.floor(Math.random() * 10)}°C and boosting to ${2700 + Math.floor(Math.random() * 300)} MHz stable now!
+
+    What do you think? Any suggestions for further improvements?`,
+
+    // Another simple message
+    `Just enabled XMP on my new DDR4-${3200 + 200 * Math.floor(Math.random() * 3)} CL${14 + Math.floor(Math.random() * 4)} kit. Is it worth trying to push it further?`,
+
+    // Complex message
+    `Finally cracked ${38000 + Math.floor(Math.random() * 4000)} in Time Spy with my overclocked ${gpus[Math.floor(Math.random() * gpus.length)]}! Here's the full setup:
+
+    GPU:
+    - Core: ${2800 + Math.floor(Math.random() * 400)} MHz (+${200 + Math.floor(Math.random() * 200)} MHz over stock)
+    - Memory: ${2000 + Math.floor(Math.random() * 1000)} MHz (+${300 + Math.floor(Math.random() * 200)} MHz)
+    - Power Limit: +${10 + Math.floor(Math.random() * 10)}% (${350 + Math.floor(Math.random() * 50)}W)
+    - Voltage: ${1.05 + Math.random() * 0.2}V
+
+    CPU (${cpus[Math.floor(Math.random() * cpus.length)]}):
+    - BCLK: ${101 + Math.random()}
+    - All-core: ${4.3 + Math.random() * 0.7}
+    - vCore: ${1.25 + Math.random() * 0.1}V
+
+    RAM:
+    - DDR4-${3600 + Math.floor(Math.random() * 400)} CL${14 + Math.floor(Math.random() * 4)}-${15 + Math.floor(Math.random() * 4)}-${15 + Math.floor(Math.random() * 4)}-${30 + Math.floor(Math.random() * 6)}
+    - ${1.35 + Math.random() * 0.2}V VDIMM
+    - Tight subtimings
+
+    Cooling:
+    - ${['Arctic Liquid Freezer II 360', 'Noctua NH-D15', 'Corsair H150i Elite Capellix', 'be quiet! Dark Rock Pro 4'][Math.floor(Math.random() * 4)]} for CPU
+    - ${['NZXT Kraken X73', 'Alphacool Eiswolf 2 AIO 360mm', 'EVGA CLC 280', 'Cooler Master MasterLiquid ML360R'][Math.floor(Math.random() * 4)]} for GPU
+
+    Any ideas on how to squeeze out that last bit of performance? Trying to hit ${40000 + Math.floor(Math.random() * 2000)}!`,
+
+    // Another simple message
+    `My CPU is hitting ${85 + Math.floor(Math.random() * 10)}°C under load. Is this normal or should I be concerned?`,
+
+    // Game performance message
+    `Just tested my new overclock in ${games[Math.floor(Math.random() * games.length)]}. Getting ${Math.floor(Math.random() * 401) + 100} FPS at 1440p Ultra settings. Not bad!`,
+
+    // Another game performance message
+    `Anyone else notice a huge FPS boost in ${games[Math.floor(Math.random() * games.length)]} after overclocking? I went from ${Math.floor(Math.random() * 151) + 100} to ${Math.floor(Math.random() * 301) + 200} FPS!`,
+
+    // Competitive gaming message
+    `Overclocked my system for ${games[Math.floor(Math.random() * games.length)]} tournaments. Now consistently hitting ${Math.floor(Math.random() * 401) + 600} FPS. The difference in responsiveness is insane!`,
+
+    // Retro hardware message
+    `Just for fun, I've been overclocking my old ${cpus.slice(-10)[Math.floor(Math.random() * 10)]}. Managed to push it from ${2 + Math.random()}GHz to ${3 + Math.random()}GHz stable. It's amazing how well some of these older chips hold up!`,
+
+    // Extreme cooling message
+    `Experimenting with liquid nitrogen cooling on my ${cpus[Math.floor(Math.random() * 10)]}. Hit ${6 + Math.random()}GHz stable! Not practical for daily use, but it's incredible to see what these chips are capable of under extreme conditions.`,
+
+    // Power consumption concern
+    `After overclocking my ${gpus[Math.floor(Math.random() * gpus.length)]}, I'm a bit worried about power consumption. My system is pulling ${650 + Math.floor(Math.random() * 350)}W from the wall under full load. Is this safe for a ${850 + Math.floor(Math.random() * 150)}W PSU?`,
+
+    // RAM overclocking
+    `Finally stabilized my RAM overclock. Running ${4 * (4 + Math.floor(Math.random() * 2))}GB of DDR4-${4000 + Math.floor(Math.random() * 800)} at CL${14 + Math.floor(Math.random() * 4)}-${15 + Math.floor(Math.random() * 4)}-${15 + Math.floor(Math.random() * 4)}-${30 + Math.floor(Math.random() * 8)}. Took a lot of tweaking, but the performance gain in memory-sensitive applications is noticeable.`,
+
+    // Undervolting attempt
+    `Trying my hand at undervolting my ${cpus[Math.floor(Math.random() * cpus.length)]}. So far, I've managed to reduce the voltage by ${0.05 + Math.random() * 0.15}V while maintaining stock clocks. Temperatures are down by ${5 + Math.floor(Math.random() * 10)}°C under load!`,
+
+    // HWBOT benchmarks message
+    `Just ran some HWBOT benchmarks on my overclocked system. Here are the results:
+
+    - y-cruncher: ${(1 + Math.random() * 9).toFixed(3)} seconds
+    - PYPrime: ${(1 + Math.random() * 9).toFixed(3)} seconds
+    - SuperPI: ${(1 + Math.random() * 9).toFixed(3)} seconds
+    - GPUPI: ${(1 + Math.random() * 9).toFixed(3)} seconds
+    - PiFast: ${(1 + Math.random() * 9).toFixed(3)} seconds
+
+    Pretty happy with these numbers. How do they compare to your results?`
+  ];
+
+  return messages[Math.floor(Math.random() * messages.length)];
+}
+
+function generateReply(originalMessage) {
+  if (originalMessage.content.includes("stability test")) {
+    return `Impressive results on your ${originalMessage.content.match(/(Intel Core|AMD Ryzen|AMD FX|AMD Phenom|AMD Athlon) [^ ]+/)[0]}! Have you considered fine-tuning your PBO curve optimizer? You might be able to squeeze out a bit more performance while keeping temperatures in check. Also, your BCLK of ${originalMessage.content.match(/BCLK: (\d+\.\d+) MHz/)[1]} MHz is quite high - make sure all your PCIe devices are stable at this frequency.`;
+  }
+  
+  if (originalMessage.content.includes("new to overclocking")) {
+    const cpu = originalMessage.content.match(/(Intel Core|AMD Ryzen|AMD FX|AMD Phenom|AMD Athlon) [^ ]+/)[0];
+    return `Welcome to the world of overclocking! For your ${cpu}, start by learning about ${cpu.includes("Intel") ? "multiplier and BCLK" : "PBO and curve optimizer"} overclocking. Be careful though, as it can affect system stability. Maybe try some memory overclocking first to get your feet wet?`;
+  }
+  
+  if (originalMessage.content.includes("custom loop")) {
+    const gpu = originalMessage.content.match(/(NVIDIA GeForce|AMD Radeon) [^ ]+/)[0];
+    const tempDrop = originalMessage.content.match(/Dropped load temps by (\d+)°C/)[1];
+    return `That's a sweet custom loop for your ${gpu}! The ${tempDrop}°C temp drop is impressive. Have you considered adding a second radiator for even better thermal performance? Also, make sure your case airflow is optimized to complement your water cooling setup.`;
+  }
+  
+  if (originalMessage.content.includes("XMP")) {
+    const ramSpeed = originalMessage.content.match(/DDR4-(\d+)/)[1];
+    const ramTimings = originalMessage.content.match(/CL(\d+)/)[1];
+    return `XMP is a great start! If you're feeling adventurous, you could try pushing your DDR4-${ramSpeed} CL${ramTimings} kit to ${parseInt(ramSpeed) + 200} MHz and tightening the timings. Just make sure to stress test thoroughly and keep an eye on temperatures.`;
+  }
+  
+  if (originalMessage.content.includes("Time Spy")) {
+    const score = originalMessage.content.match(/cracked (\d+) in Time Spy/)[1];
+    const gpu = originalMessage.content.match(/(NVIDIA GeForce|AMD Radeon) [^ ]+/)[0];
+    return `Fantastic Time Spy score of ${score} with your ${gpu}! For that last push to ${parseInt(score) + 1000}, have you tried tweaking your FCLK and memory timings? Getting them in perfect sync can sometimes provide that final boost you're looking for. Also, consider trying different GPU thermal pads if you haven't already.`;
+  }
+  
+  if (originalMessage.content.includes("°C under load")) {
+    const temp = originalMessage.content.match(/(\d+)°C under load/)[1];
+    return `${temp}°C is ${parseInt(temp) > 85 ? "on the high side" : "pretty good"} for most modern CPUs under load. However, you might want to check your thermal paste application and cooler mounting. ${parseInt(temp) > 85 ? "Consider upgrading your CPU cooler or improving case airflow." : "There's always room for improvement if you want to push your overclock further."}`;
+  }
+  
+  if (originalMessage.content.includes("FPS")) {
+    const game = originalMessage.content.match(/in (.+?)\./)[1];
+    const fps = parseInt(originalMessage.content.match(/(\d+) FPS/)[1]);
+    return `Those are some great FPS numbers in ${game}! ${fps > 144 ? "Make sure your monitor can keep up with those high framerates." : "Have you considered upgrading to a higher refresh rate monitor to fully appreciate the extra frames?"} Also, you might want to look into frame timing and 1% lows for a smoother experience.`;
+  }
+  
+  if (originalMessage.content.includes("liquid nitrogen")) {
+    const cpu = originalMessage.content.match(/(Intel Core|AMD Ryzen|AMD FX|AMD Phenom|AMD Athlon) [^ ]+/)[0];
+    const clockSpeed = originalMessage.content.match(/Hit ([\d.]+)GHz stable/)[1];
+    return `Wow, ${clockSpeed}GHz on the ${cpu} with LN2 is impressive! Have you considered participating in overclocking competitions? It would be interesting to see how your chip compares to others under extreme cooling. Just be careful with condensation when you're pushing temperatures that low!`;
+  }
+  
+  if (originalMessage.content.includes("power consumption")) {
+    const watts = originalMessage.content.match(/pulling (\d+)W from the wall/)[1];
+    const psu = originalMessage.content.match(/(\d+)W PSU/)[1];
+    return `A ${watts}W draw on a ${psu}W PSU is ${parseInt(watts) / parseInt(psu) > 0.8 ? "pushing it a bit" : "generally okay"}. Remember, it's good practice to keep your power draw under 80% of your PSU's rated capacity for efficiency and longevity. ${parseInt(watts) / parseInt(psu) > 0.8 ? "You might want to consider upgrading your PSU for more headroom." : "You've got some room to push your overclock further if you want!"}`;
+  }
+  
+  if (originalMessage.content.includes("RAM overclock")) {
+    const speed = originalMessage.content.match(/DDR4-(\d+)/)[1];
+    const timings = originalMessage.content.match(/CL(\d+)-(\d+)-(\d+)-(\d+)/);
+    return `Impressive RAM overclock! DDR4-${speed} with timings of ${timings[1]}-${timings[2]}-${timings[3]}-${timings[4]} is no small feat. Have you run memory-specific stress tests like MemTest86 or TestMem5? Also, don't forget to test real-world performance improvements in apps and games you frequently use.`;
+  }
+  
+  if (originalMessage.content.includes("undervolting")) {
+    const cpu = originalMessage.content.match(/(Intel Core|AMD Ryzen|AMD FX|AMD Phenom|AMD Athlon) [^ ]+/)[0];
+    const voltDrop = originalMessage.content.match(/reduce the voltage by ([\d.]+)V/)[1];
+    const tempDrop = originalMessage.content.match(/Temperatures are down by (\d+)°C/)[1];
+    return `Nice work on undervolting your ${cpu}! A ${voltDrop}V reduction while maintaining stock clocks is solid, and the ${tempDrop}°C temperature drop is significant. Have you considered combining this with a mild overclock? You might be able to achieve higher performance at the same temperatures as stock.`;
+  }
+  
+  if (originalMessage.content.includes("HWBOT benchmarks")) {
+    return `Those are some impressive HWBOT benchmark results! Your y-cruncher and PYPrime times are particularly strong. Have you considered submitting these scores to the HWBOT database? It would be interesting to see how your system ranks against others with similar hardware. Also, have you tried tweaking your OS for benchmark runs? Sometimes, disabling unnecessary services and adjusting process priorities can shave off a few milliseconds.`;
+  }
+  
+  return `Interesting overclock! Have you stress tested for stability? It's always good to run a mix of synthetic benchmarks and real-world workloads to ensure your system is rock solid.`;
+}
+
+function addMessage(replyTo = null) {
+  const messagesContainer = document.getElementById('messages');
+  const message = generateMessage(replyTo);
+  
+  const messageElement = document.createElement('div');
+  messageElement.className = replyTo ? 'message reply' : 'message';
+  messageElement.innerHTML = `
+    <div class="message-header">
+      <div class="avatar">${message.user.avatar}</div>
+      <span class="username">${message.user.name}</span>
+      <span class="timestamp">Today at ${message.timestamp}</span>
+    </div>
+    <div class="message-content">${message.content}</div>
+  `;
+  
+  messagesContainer.appendChild(messageElement);
+
+  // 50% chance to generate a reply
+  if (Math.random() < 0.5) {
+    setTimeout(() => addMessage(message), Math.random() * 2000 + 1000);
+  }
+}
+
+// Generate a new message every 3-7 seconds
+setInterval(() => addMessage(), Math.random() * 4000 + 3000);
+
+// Initial messages
+for (let i = 0; i < 15; i++) {
+  addMessage();
+}
+</script>
+
+</body></html>
