@@ -140,6 +140,11 @@ const users = [
   {name: "CoolingCrusader", avatar: "❄️"},
   {name: "OverclockNewbie", avatar: "🐣"},
   {name: "ExtremeTweaker", avatar: "🔧"},
+  {name: "FrequencyPhenom", avatar: "📈"},
+  {name: "VoltageVeteran", avatar: "🎖️"},
+  {name: "ThermalTamer", avatar: "🧊"},
+  {name: "MemoryMaven", avatar: "🧠"},
+  {name: "StabilitySeeker", avatar: "🎯"}
 ];
 
 const topics = [
@@ -154,6 +159,15 @@ const topics = [
   "silicon lottery",
   "thermal paste application",
   "gaming performance",
+  "undervolting techniques",
+  "custom water cooling",
+  "air cooling optimizations",
+  "BCLK overclocking",
+  "memory timing optimization",
+  "VRM cooling solutions",
+  "overclocking software",
+  "hardware monitoring tools",
+  "power supply considerations"
 ];
 
 const games = [
@@ -164,7 +178,9 @@ const games = [
   "Rainbow Six Siege", "Rocket League", "Among Us", "Fall Guys", "Valorant",
   "Hades", "Stardew Valley", "Civilization VI", "The Elder Scrolls V: Skyrim", "Portal 2",
   "Half-Life 2", "BioShock", "Mass Effect 2", "Dark Souls", "Borderlands 2",
-  "Fallout: New Vegas", "The Last of Us", "God of War", "Red Dead Redemption", "Batman: Arkham City"
+  "Fallout: New Vegas", "The Last of Us", "God of War", "Red Dead Redemption", "Batman: Arkham City",
+  "Final Fantasy XIV", "Path of Exile", "Warframe", "Destiny 2", "The Division 2",
+  "Genshin Impact", "Horizon Zero Dawn", "Death Stranding", "Monster Hunter: World", "Sekiro: Shadows Die Twice"
 ];
 
 const cpus = [
@@ -177,7 +193,9 @@ const cpus = [
   "Intel Core i7-8700K", "AMD Ryzen 7 1800X", "Intel Core i5-8600K", "AMD Ryzen 5 1600",
   "Intel Core i7-7700K", "AMD Ryzen 7 1700", "Intel Core i5-7600K", "AMD FX-8350",
   "Intel Core i7-6700K", "AMD FX-6300", "Intel Core i5-6600K", "AMD Phenom II X6 1100T",
-  "Intel Core i7-4790K", "AMD Phenom II X4 965", "Intel Core i5-4690K", "AMD Athlon 64 X2 6000+"
+  "Intel Core i7-4790K", "AMD Phenom II X4 965", "Intel Core i5-4690K", "AMD Athlon 64 X2 6000+",
+  "Intel Core i9-13900K", "AMD Ryzen 9 7950X", "Intel Core i7-13700K", "AMD Ryzen 7 7700X",
+  "Intel Core i5-13600K", "AMD Ryzen 5 7600X", "Intel Core i9-12950HX", "AMD Ryzen 9 6980HX"
 ];
 
 const gpus = [
@@ -190,7 +208,25 @@ const gpus = [
   "NVIDIA GeForce GTX 1060", "AMD Radeon RX 570", "NVIDIA GeForce GTX 980 Ti", "AMD Radeon R9 Fury X",
   "NVIDIA GeForce GTX 980", "AMD Radeon R9 390X", "NVIDIA GeForce GTX 970", "AMD Radeon R9 390",
   "NVIDIA GeForce GTX 780 Ti", "AMD Radeon R9 290X", "NVIDIA GeForce GTX 780", "AMD Radeon R9 290",
-  "NVIDIA GeForce GTX 770", "AMD Radeon HD 7970", "NVIDIA GeForce GTX 760", "AMD Radeon HD 7950"
+  "NVIDIA GeForce GTX 770", "AMD Radeon HD 7970", "NVIDIA GeForce GTX 760", "AMD Radeon HD 7950",
+  "NVIDIA GeForce RTX 4090", "AMD Radeon RX 7900 XTX", "NVIDIA GeForce RTX 4080", "AMD Radeon RX 7900 XT",
+  "NVIDIA GeForce RTX 4070 Ti", "AMD Radeon RX 6950 XT", "NVIDIA GeForce RTX 4060 Ti", "AMD Radeon RX 6750 XT"
+];
+
+const coolers = [
+  "Noctua NH-D15", "be quiet! Dark Rock Pro 4", "Scythe Fuma 2", "Cooler Master Hyper 212 EVO",
+  "Arctic Freezer 34 eSports DUO", "Cryorig H7 Quad Lumi", "Thermalright Le Grand Macho RT",
+  "Corsair iCUE H150i ELITE CAPELLIX", "NZXT Kraken X73", "Arctic Liquid Freezer II 360",
+  "EK-AIO 360 D-RGB", "Alphacool Eisbaer Aurora 360", "Thermaltake Floe Riing RGB 360 TT Premium Edition",
+  "Lian Li Galahad AIO 360", "be quiet! Silent Loop 2 360"
+];
+
+const cases = [
+  "Lian Li PC-O11 Dynamic", "Fractal Design Meshify C", "NZXT H510", "Phanteks Eclipse P400A",
+  "Cooler Master MasterCase H500", "be quiet! Pure Base 500DX", "Corsair 4000D Airflow",
+  "Thermaltake View 71 ARGB Edition", "Silverstone RV02", "In Win 303",
+  "Fractal Design Define 7", "Cooler Master HAF X", "Phanteks Enthoo Pro", "NZXT H710i",
+  "be quiet! Dark Base Pro 900"
 ];
 
 function generateMessage(replyTo = null) {
@@ -219,17 +255,17 @@ function generateInitialMessage() {
     <code>
     - BCLK: ${(100 + Math.random() * 5).toFixed(1)} MHz
     - Effective Clock: ${(4 + Math.random() * 1.5).toFixed(2)} GHz all-core, ${(4.5 + Math.random() * 1).toFixed(2)} GHz single-core
-    - vCore: ${(1.2 + Math.random() * 0.15).toFixed(2)}V (static)
-    - VDDCR SOC: ${(1 + Math.random() * 0.2).toFixed(2)}V
-    - VDDG CCD: ${(0.9 + Math.random() * 0.1).toFixed(2)}V
-    - VDDG IOD: ${(1 + Math.random() * 0.1).toFixed(2)}V
-    - CLDO VDDP: ${(0.85 + Math.random() * 0.1).toFixed(2)}V
+    - vCore: ${(1.2 + Math.random() * 0.15).toFixed(3)}V (static)
+    - VDDCR SOC: ${(1 + Math.random() * 0.2).toFixed(3)}V
+    - VDDG CCD: ${(0.9 + Math.random() * 0.1).toFixed(3)}V
+    - VDDG IOD: ${(1 + Math.random() * 0.1).toFixed(3)}V
+    - CLDO VDDP: ${(0.85 + Math.random() * 0.1).toFixed(3)}V
     - PBO: ${Math.random() > 0.5 ? 'Enabled' : 'Disabled'}
     - C-States: ${Math.random() > 0.5 ? 'Enabled' : 'Disabled'}
     - Power Limit: ${110 + Math.floor(Math.random() * 40)}W
     </code>
 
-    Ran Prime95 Small FFTs for ${6 + Math.floor(Math.random() * 6)} hours, OCCT Large for ${3 + Math.floor(Math.random() * 5)} hours, and ${80 + Math.floor(Math.random() * 40)} cycles of Linpack Xtreme. Max temp was ${75 + Math.floor(Math.random() * 15)}°C with a Noctua NH-D15.
+    Ran Prime95 Small FFTs for ${6 + Math.floor(Math.random() * 6)} hours, OCCT Large for ${3 + Math.floor(Math.random() * 5)} hours, and ${80 + Math.floor(Math.random() * 40)} cycles of Linpack Xtreme. Max temp was ${75 + Math.floor(Math.random() * 15)}°C with a ${coolers[Math.floor(Math.random() * coolers.length)]}.
 
     Cinebench R23 scores:
     - Single Core: ${1500 + Math.floor(Math.random() * 300)} (up from ${1400 + Math.floor(Math.random() * 200)} stock)
@@ -281,8 +317,8 @@ function generateInitialMessage() {
     - Tight subtimings
 
     Cooling:
-    - ${['Arctic Liquid Freezer II 360', 'Noctua NH-D15', 'Corsair H150i Elite Capellix', 'be quiet! Dark Rock Pro 4'][Math.floor(Math.random() * 4)]} for CPU
-    - ${['NZXT Kraken X73', 'Alphacool Eiswolf 2 AIO 360mm', 'EVGA CLC 280', 'Cooler Master MasterLiquid ML360R'][Math.floor(Math.random() * 4)]} for GPU
+    - ${coolers[Math.floor(Math.random() * coolers.length)]} for CPU
+    - ${coolers[Math.floor(Math.random() * coolers.length)]} for GPU
 
     Any ideas on how to squeeze out that last bit of performance? Trying to hit ${40000 + Math.floor(Math.random() * 2000)}!`,
 
@@ -322,7 +358,67 @@ function generateInitialMessage() {
     - GPUPI: ${(1 + Math.random() * 9).toFixed(3)} seconds
     - PiFast: ${(1 + Math.random() * 9).toFixed(3)} seconds
 
-    Pretty happy with these numbers. How do they compare to your results?`
+    Pretty happy with these numbers. How do they compare to your results?`,
+
+    // Case airflow optimization
+    `Just upgraded my case to the ${cases[Math.floor(Math.random() * cases.length)]}. The difference in airflow is night and day! My CPU temps dropped by ${5 + Math.floor(Math.random() * 10)}°C and GPU temps by ${3 + Math.floor(Math.random() * 8)}°C. Definitely worth the investment for better overclocking headroom.`,
+
+    // BIOS update experience
+    `Updated my BIOS to the latest version and it's made a world of difference for my RAM overclocking. I can now run my ${4 * (4 + Math.floor(Math.random() * 2))}GB kit at DDR4-${3600 + Math.floor(Math.random() * 400)} with tight timings. Always worth keeping your BIOS up to date!`,
+
+    // Overclocking for productivity
+    `Been tweaking my ${cpus[Math.floor(Math.random() * cpus.length)]} overclock for video editing and 3D rendering. Managed to reduce my render times by ${10 + Math.floor(Math.random() * 20)}%! It's not all about gaming performance.`,
+
+    // GPU memory overclocking
+    `Pushed the memory on my ${gpus[Math.floor(Math.random() * gpus.length)]} to ${14000 + Math.floor(Math.random() * 2000)} MHz. Seeing some nice gains in texture-heavy games. Anyone else had success with high memory clocks?`,
+
+    // Overclocking old hardware
+    `Breathed new life into my old ${cpus.slice(-10)[Math.floor(Math.random() * 10)]} system with a hefty overclock. It's now able to run ${games[Math.floor(Math.random() * games.length)]} at playable framerates. Old hardware can still shine with a bit of tweaking!`,
+
+    // Discussing silicon quality
+    `I think I hit the silicon lottery with my ${cpus[Math.floor(Math.random() * cpus.length)]}. It's stable at ${4.8 + Math.random() * 0.5}GHz all-core with only ${1.25 + Math.random() * 0.1}V. Anyone else have a golden chip?`,
+
+    // Custom water cooling
+    `Finally finished my custom water cooling loop! Using ${coolers[Math.floor(Math.random() * coolers.length)]} for the CPU and a custom block for my ${gpus[Math.floor(Math.random() * gpus.length)]}. Idle temps are now ${20 + Math.floor(Math.random() * 5)}°C for both CPU and GPU. Can't wait to push the clocks further!`,
+
+    // Discussing stability testing methods
+    `What's everyone's go-to method for stability testing? I've been using a combination of Prime95, OCCT, and real-world workloads. Curious to hear about other approaches.`,
+
+    // Overclocking impact on game streaming
+    `Has anyone noticed improved streaming performance after overclocking? I'm able to use a higher quality x264 preset now without dropping frames. Curious if others have had similar experiences.`,
+
+    // discussing overclocking tools
+    `What's your preferred overclocking software? I've been using a mix of ${Math.random() > 0.5 ? 'MSI Afterburner' : 'EVGA Precision X1'} for GPU and ${Math.random() > 0.5 ? 'Ryzen Master' : 'Intel XTU'} for CPU. Any other recommendations?`,
+
+    // discussing power supply importance
+    `Just upgraded my power supply to a ${850 + Math.floor(Math.random() * 150)}W 80+ Titanium unit. The improved power delivery has actually allowed me to push my ${gpus[Math.floor(Math.random() * gpus.length)]} ${50 + Math.floor(Math.random() * 50)}MHz higher! Don't underestimate the importance of a good PSU.`,
+
+    // discussing monitor overclocking
+    `Anyone had success overclocking their monitor? I managed to push my 144Hz panel to 165Hz stable. The extra smoothness is subtle but noticeable, especially in fast-paced games.`,
+
+    // discussing FCLK and memory controller overclocking
+    `Been tweaking my Ryzen's FCLK and memory controller. Got it stable at 1900MHz with tight timings. The impact on latency-sensitive applications is impressive. Any tips for pushing it further?`,
+
+    // discussing laptop overclocking
+    `Any laptop overclockers here? I've managed to undervolt my mobile ${cpus[Math.floor(Math.random() * cpus.length)]} by ${50 + Math.floor(Math.random() * 50)}mV and increase the boost clock by ${100 + Math.floor(Math.random() * 200)}MHz. Temps are down and performance is up!`,
+
+    // discussing budget overclocking
+    `Budget overclocking challenge: Got an old ${cpus.slice(-10)[Math.floor(Math.random() * 10)]} stable at ${3.5 + Math.random() * 1}GHz with a ${20 + Math.floor(Math.random() * 10)}$ cooler. It's not breaking any records, but it's a fun project. Anyone else enjoy squeezing performance out of budget builds?`,
+
+    // discussing VRM cooling
+    `Just added some small heatsinks to my motherboard's VRMs. Temperatures dropped by ${10 + Math.floor(Math.random() * 10)}°C under load, allowing for a more stable overclock. Don't neglect your VRM cooling!`,
+
+    // discussing BIOS modding
+    `Anyone here into BIOS modding? I've unlocked some hidden settings on my motherboard and it's opened up a whole new world of tweaking options. It's not for the faint of heart, but the results can be impressive.`,
+
+    // discussing competitive overclocking
+    `Thinking about getting into competitive overclocking. Any veterans here with advice? I'm looking at investing in some LN2 gear and a few golden sample CPUs to start.`,
+
+    // discussing overclocking for emulation
+    `Overclocked my ${cpus[Math.floor(Math.random() * cpus.length)]} specifically for emulation. The single-core boost to ${5 + Math.random() * 0.5}GHz has made a huge difference in games like ${games[Math.floor(Math.random() * games.length)]}. Any other emulation enthusiasts here?`,
+
+    // discussing memory timing tweaking
+    `Deep dive into memory timings today. Managed to tighten tRFC from 630 to 520, tRRD_S from 6 to 4, and tFAW from 24 to 16. The impact on memory bandwidth and latency is noticeable. Anyone else enjoy the intricacies of memory overclocking?`
   ];
 
   return messages[Math.floor(Math.random() * messages.length)];
@@ -335,68 +431,183 @@ function generateReply(originalMessage) {
   
   if (originalMessage.content.includes("new to overclocking")) {
     const cpu = originalMessage.content.match(/(Intel Core|AMD Ryzen|AMD FX|AMD Phenom|AMD Athlon) [^ ]+/)[0];
-    return `Welcome to the world of overclocking! For your ${cpu}, start by learning about ${cpu.includes("Intel") ? "multiplier and BCLK" : "PBO and curve optimizer"} overclocking. Be careful though, as it can affect system stability. Maybe try some memory overclocking first to get your feet wet?`;
+    return `Welcome to the world of overclocking! For your ${cpu}, start by learning about ${cpu.includes("Intel") ? "multiplier and BCLK" : "PBO and curve optimizer"} overclocking. Be careful though, as it can affect system stability. Maybe try some memory overclocking first to get your feet wet? Also, make sure you have adequate cooling before pushing your CPU too far.`;
   }
   
   if (originalMessage.content.includes("custom loop")) {
     const gpu = originalMessage.content.match(/(NVIDIA GeForce|AMD Radeon) [^ ]+/)[0];
+""
     const tempDrop = originalMessage.content.match(/Dropped load temps by (\d+)°C/)[1];
-    return `That's a sweet custom loop for your ${gpu}! The ${tempDrop}°C temp drop is impressive. Have you considered adding a second radiator for even better thermal performance? Also, make sure your case airflow is optimized to complement your water cooling setup.`;
+    return `That's a sweet custom loop for your ${gpu}! The ${tempDrop}°C temp drop is impressive. Have you considered adding a second radiator for even better thermal performance? Also, make sure your case airflow is optimized to complement your water cooling setup. You might want to look into some high static pressure fans for your radiators to maximize efficiency.`;
   }
   
   if (originalMessage.content.includes("XMP")) {
     const ramSpeed = originalMessage.content.match(/DDR4-(\d+)/)[1];
     const ramTimings = originalMessage.content.match(/CL(\d+)/)[1];
-    return `XMP is a great start! If you're feeling adventurous, you could try pushing your DDR4-${ramSpeed} CL${ramTimings} kit to ${parseInt(ramSpeed) + 200} MHz and tightening the timings. Just make sure to stress test thoroughly and keep an eye on temperatures.`;
+    return `XMP is a great start! If you're feeling adventurous, you could try pushing your DDR4-${ramSpeed} CL${ramTimings} kit to ${parseInt(ramSpeed) + 200} MHz and tightening the timings. Just make sure to stress test thoroughly and keep an eye on temperatures. Don't forget to adjust your VCCSA and VCCIO voltages if needed, especially on Intel systems.`;
   }
   
   if (originalMessage.content.includes("Time Spy")) {
     const score = originalMessage.content.match(/cracked (\d+) in Time Spy/)[1];
     const gpu = originalMessage.content.match(/(NVIDIA GeForce|AMD Radeon) [^ ]+/)[0];
-    return `Fantastic Time Spy score of ${score} with your ${gpu}! For that last push to ${parseInt(score) + 1000}, have you tried tweaking your FCLK and memory timings? Getting them in perfect sync can sometimes provide that final boost you're looking for. Also, consider trying different GPU thermal pads if you haven't already.`;
+    return `Fantastic Time Spy score of ${score} with your ${gpu}! For that last push to ${parseInt(score) + 1000}, have you tried tweaking your FCLK and memory timings? Getting them in perfect sync can sometimes provide that final boost you're looking for. Also, consider trying different GPU thermal pads if you haven't already. Sometimes, better thermal transfer can allow for higher sustained boost clocks.`;
   }
   
   if (originalMessage.content.includes("°C under load")) {
     const temp = originalMessage.content.match(/(\d+)°C under load/)[1];
-    return `${temp}°C is ${parseInt(temp) > 85 ? "on the high side" : "pretty good"} for most modern CPUs under load. However, you might want to check your thermal paste application and cooler mounting. ${parseInt(temp) > 85 ? "Consider upgrading your CPU cooler or improving case airflow." : "There's always room for improvement if you want to push your overclock further."}`;
+    return `${temp}°C is ${parseInt(temp) > 85 ? "on the high side" : "pretty good"} for most modern CPUs under load. However, you might want to check your thermal paste application and cooler mounting. ${parseInt(temp) > 85 ? "Consider upgrading your CPU cooler or improving case airflow." : "There's always room for improvement if you want to push your overclock further."} Have you looked into delidding? It can significantly improve thermal performance, especially on Intel CPUs, but it does come with risks.`;
   }
   
   if (originalMessage.content.includes("FPS")) {
     const game = originalMessage.content.match(/in (.+?)\./)[1];
     const fps = parseInt(originalMessage.content.match(/(\d+) FPS/)[1]);
-    return `Those are some great FPS numbers in ${game}! ${fps > 144 ? "Make sure your monitor can keep up with those high framerates." : "Have you considered upgrading to a higher refresh rate monitor to fully appreciate the extra frames?"} Also, you might want to look into frame timing and 1% lows for a smoother experience.`;
+    return `Those are some great FPS numbers in ${game}! ${fps > 144 ? "Make sure your monitor can keep up with those high framerates." : "Have you considered upgrading to a higher refresh rate monitor to fully appreciate the extra frames?"} Also, you might want to look into frame timing and 1% lows for a smoother experience. Sometimes, a slightly lower but more consistent framerate can feel better than higher but more variable FPS.`;
   }
   
   if (originalMessage.content.includes("liquid nitrogen")) {
     const cpu = originalMessage.content.match(/(Intel Core|AMD Ryzen|AMD FX|AMD Phenom|AMD Athlon) [^ ]+/)[0];
     const clockSpeed = originalMessage.content.match(/Hit ([\d.]+)GHz stable/)[1];
-    return `Wow, ${clockSpeed}GHz on the ${cpu} with LN2 is impressive! Have you considered participating in overclocking competitions? It would be interesting to see how your chip compares to others under extreme cooling. Just be careful with condensation when you're pushing temperatures that low!`;
+    return `Wow, ${clockSpeed}GHz on the ${cpu} with LN2 is impressive! Have you considered participating in overclocking competitions? It would be interesting to see how your chip compares to others under extreme cooling. Just be careful with condensation when you're pushing temperatures that low! Have you looked into insulating your motherboard and surrounding components? It's crucial for preventing damage during extreme cooling sessions.`;
   }
   
   if (originalMessage.content.includes("power consumption")) {
     const watts = originalMessage.content.match(/pulling (\d+)W from the wall/)[1];
     const psu = originalMessage.content.match(/(\d+)W PSU/)[1];
-    return `A ${watts}W draw on a ${psu}W PSU is ${parseInt(watts) / parseInt(psu) > 0.8 ? "pushing it a bit" : "generally okay"}. Remember, it's good practice to keep your power draw under 80% of your PSU's rated capacity for efficiency and longevity. ${parseInt(watts) / parseInt(psu) > 0.8 ? "You might want to consider upgrading your PSU for more headroom." : "You've got some room to push your overclock further if you want!"}`;
+    return `A ${watts}W draw on a ${psu}W PSU is ${parseInt(watts) / parseInt(psu) > 0.8 ? "pushing it a bit" : "generally okay"}. Remember, it's good practice to keep your power draw under 80% of your PSU's rated capacity for efficiency and longevity. ${parseInt(watts) / parseInt(psu) > 0.8 ? "You might want to consider upgrading your PSU for more headroom." : "You've got some room to push your overclock further if you want!"} Also, consider the quality of your PSU, not just its wattage. A high-quality PSU with clean power delivery can sometimes allow for more stable overclocks.`;
   }
   
   if (originalMessage.content.includes("RAM overclock")) {
     const speed = originalMessage.content.match(/DDR4-(\d+)/)[1];
     const timings = originalMessage.content.match(/CL(\d+)-(\d+)-(\d+)-(\d+)/);
-    return `Impressive RAM overclock! DDR4-${speed} with timings of ${timings[1]}-${timings[2]}-${timings[3]}-${timings[4]} is no small feat. Have you run memory-specific stress tests like MemTest86 or TestMem5? Also, don't forget to test real-world performance improvements in apps and games you frequently use.`;
+    return `Impressive RAM overclock! DDR4-${speed} with timings of ${timings[1]}-${timings[2]}-${timings[3]}-${timings[4]} is no small feat. Have you run memory-specific stress tests like MemTest86 or TestMem5? Also, don't forget to test real-world performance improvements in apps and games you frequently use. Sometimes, tighter secondary and tertiary timings can have a bigger impact than raw frequency. Have you looked into tweaking those?`;
   }
   
   if (originalMessage.content.includes("undervolting")) {
     const cpu = originalMessage.content.match(/(Intel Core|AMD Ryzen|AMD FX|AMD Phenom|AMD Athlon) [^ ]+/)[0];
     const voltDrop = originalMessage.content.match(/reduce the voltage by ([\d.]+)V/)[1];
     const tempDrop = originalMessage.content.match(/Temperatures are down by (\d+)°C/)[1];
-    return `Nice work on undervolting your ${cpu}! A ${voltDrop}V reduction while maintaining stock clocks is solid, and the ${tempDrop}°C temperature drop is significant. Have you considered combining this with a mild overclock? You might be able to achieve higher performance at the same temperatures as stock.`;
+    return `Nice work on undervolting your ${cpu}! A ${voltDrop}V reduction while maintaining stock clocks is solid, and the ${tempDrop}°C temperature drop is significant. Have you considered combining this with a mild overclock? You might be able to achieve higher performance at the same temperatures as stock. Also, make sure to test with various workloads, as some AVX-heavy tasks might require a bit more voltage than others.`;
   }
   
   if (originalMessage.content.includes("HWBOT benchmarks")) {
-    return `Those are some impressive HWBOT benchmark results! Your y-cruncher and PYPrime times are particularly strong. Have you considered submitting these scores to the HWBOT database? It would be interesting to see how your system ranks against others with similar hardware. Also, have you tried tweaking your OS for benchmark runs? Sometimes, disabling unnecessary services and adjusting process priorities can shave off a few milliseconds.`;
+    return `Those are some impressive HWBOT benchmark results! Your y-cruncher and PYPrime times are particularly strong. Have you considered submitting these scores to the HWBOT database? It would be interesting to see how your system ranks against others with similar hardware. Also, have you tried tweaking your OS for benchmark runs? Sometimes, disabling unnecessary services and adjusting process priorities can shave off a few milliseconds. Don't forget about the impact of background processes and even the choice of benchmark version on your scores.`;
   }
   
-  return `Interesting overclock! Have you stress tested for stability? It's always good to run a mix of synthetic benchmarks and real-world workloads to ensure your system is rock solid.`;
+  if (originalMessage.content.includes("airflow optimization")) {
+    const case_ = originalMessage.content.match(/upgraded my case to the (.+?)\./)[1];
+    const cpuTempDrop = originalMessage.content.match(/CPU temps dropped by (\d+)°C/)[1];
+    const gpuTempDrop = originalMessage.content.match(/GPU temps by (\d+)°C/)[1];
+    return `Great choice with the ${case_}! A ${cpuTempDrop}°C drop in CPU temps and ${gpuTempDrop}°C for the GPU is significant. Have you experimented with different fan configurations? Sometimes, a slight adjustment in fan curves or the addition of a few strategically placed case fans can make a big difference. Also, consider the impact of positive vs negative air pressure in your case - it can affect dust buildup and overall cooling efficiency.`;
+  }
+  
+  if (originalMessage.content.includes("BIOS update")) {
+    const ramSize = originalMessage.content.match(/(\d+)GB kit/)[1];
+    const ramSpeed = originalMessage.content.match(/DDR4-(\d+)/)[1];
+    return `It's great that the BIOS update improved your RAM overclocking! Running a ${ramSize}GB kit at DDR4-${ramSpeed} with tight timings is impressive. Have you noticed any improvements in memory-sensitive applications or games? Sometimes, BIOS updates can also bring improvements to CPU boosting behavior. It might be worth revisiting your CPU overclock to see if you can squeeze out a bit more performance.`;
+  }
+  
+  if (originalMessage.content.includes("video editing and 3D rendering")) {
+    const cpu = originalMessage.content.match(/(Intel Core|AMD Ryzen|AMD FX|AMD Phenom|AMD Athlon) [^ ]+/)[0];
+    const renderTimeReduction = originalMessage.content.match(/reduce my render times by (\d+)%/)[1];
+    return `A ${renderTimeReduction}% reduction in render times is huge! Your ${cpu} overclock is clearly paying off for productivity tasks. Have you looked into optimizing your render settings to take advantage of your CPU's specific architecture? Some rendering engines can benefit from tweaks like adjusting tile sizes or using specific instruction sets. Also, don't forget about the potential benefits of overclocking your GPU for tasks that can utilize CUDA or OpenCL.`;
+  }
+  
+  if (originalMessage.content.includes("GPU memory overclocking")) {
+    const gpu = originalMessage.content.match(/(NVIDIA GeForce|AMD Radeon) [^ ]+/)[0];
+    const memorySpeed = originalMessage.content.match(/to (\d+) MHz/)[1];
+    return `Pushing your ${gpu}'s memory to ${memorySpeed} MHz is impressive! Memory overclocking can indeed have a significant impact on texture-heavy games. Have you run any memory-specific GPU stress tests to ensure stability? Also, keep in mind that some GPUs have error correction for memory, which can kick in before you see artifacts. This can actually lead to decreased performance if pushed too far. Monitoring performance with benchmarks as you increase clocks is crucial.`;
+  }
+  
+  if (originalMessage.content.includes("old hardware")) {
+    const cpu = originalMessage.content.match(/(Intel Core|AMD Ryzen|AMD FX|AMD Phenom|AMD Athlon) [^ ]+/)[0];
+    const game = originalMessage.content.match(/run (.+?) at playable framerates/)[1];
+    return `It's always fun to breathe new life into old hardware! Getting your ${cpu} to run ${game} at playable framerates is a great achievement. Have you considered pairing it with an older GPU and seeing how far you can push the entire system? Sometimes, balancing CPU and GPU performance in older systems can lead to surprisingly capable budget gaming rigs. Don't forget about the potential benefits of an SSD upgrade if you haven't already - it can make a world of difference in overall system responsiveness.`;
+  }
+  
+  if (originalMessage.content.includes("silicon lottery")) {
+    const cpu = originalMessage.content.match(/(Intel Core|AMD Ryzen|AMD FX|AMD Phenom|AMD Athlon) [^ ]+/)[0];
+    const clockSpeed = originalMessage.content.match(/stable at ([\d.]+)GHz/)[1];
+    const voltage = originalMessage.content.match(/with only ([\d.]+)V/)[1];
+    return `Congratulations on your golden ${cpu}! ${clockSpeed}GHz all-core at only ${voltage}V is indeed impressive. Have you tried pushing it even further? Sometimes, these exceptional chips can hit much higher clocks with relatively small voltage increases. Just be sure to keep an eye on temperatures and power draw. Also, consider running some longer-term stability tests to ensure it's truly stable for daily use - some instabilities only show up after hours of stress testing.`;
+  }
+  
+  if (originalMessage.content.includes("custom water cooling loop")) {
+    const cpuCooler = originalMessage.content.match(/Using (.+?) for the CPU/)[1];
+    const gpu = originalMessage.content.match(/custom block for my (NVIDIA GeForce|AMD Radeon) [^ ]+/)[1];
+    const idleTemp = originalMessage.content.match(/Idle temps are now (\d+)°C/)[1];
+    return `Your custom loop sounds awesome! The ${cpuCooler} for the CPU and a custom block for your ${gpu} should provide excellent cooling. ${idleTemp}°C idle temps for both CPU and GPU is very good. Have you stress tested to see what your load temperatures look like? Also, consider the potential for a dual-loop setup if you want to push things even further - separating CPU and GPU loops can sometimes allow for even better thermal performance. Don't forget about regular maintenance - flushing and cleaning your loop periodically is crucial for long-term performance.`;
+  }
+  
+  if (originalMessage.content.includes("stability testing methods")) {
+    return `Your combination of Prime95, OCCT, and real-world workloads is a solid approach to stability testing. Have you considered adding some GPU-specific tests like Furmark or MSI Kombustor, especially if you're overclocking your graphics card? Also, memory-specific tests like MemTest86 or TestMem5 can be crucial for ensuring RAM stability. For a really thorough test, you might want to look into tools like AIDA64's system stability test, which can stress multiple components simultaneously. Remember, true stability often only reveals itself after extended testing periods - some overclockers swear by 24-hour stress test runs.`;
+  }
+  
+  if (originalMessage.content.includes("improved streaming performance")) {
+    return `It's great that you're seeing improved streaming performance after overclocking! Being able to use a higher quality x264 preset without dropping frames is a significant improvement. Have you considered leveraging your GPU for encoding using NVENC (for NVIDIA) or VCE (for AMD)? Modern GPUs can often handle streaming encoding with minimal performance impact, potentially allowing you to push your CPU overclock even further for game performance. Also, don't forget about the impact of RAM speed and timings on frame pacing and overall smoothness - it can make a big difference in both gameplay and stream quality.`;
+  }
+  
+  if (originalMessage.content.includes("overclocking software")) {
+    const gpuSoftware = originalMessage.content.includes('MSI Afterburner') ? 'MSI Afterburner' : 'EVGA Precision X1';
+    const cpuSoftware = originalMessage.content.includes('Ryzen Master') ? 'Ryzen Master' : 'Intel XTU';
+    return `${gpuSoftware} is indeed a popular choice for GPU overclocking, and ${cpuSoftware} is great for CPU tweaking. Have you tried ThrottleStop for more granular control over CPU parameters, especially on laptops? For memory overclocking, many enthusiasts swear by DRAM Calculator for Ryzen (even for some Intel systems). Don't forget about HWiNFO64 for detailed hardware monitoring - it can be invaluable for tracking temperatures, frequencies, and voltages during stress testing.`;
+  }
+  
+  if (originalMessage.content.includes("power supply importance")) {
+    const psuWattage = originalMessage.content.match(/(\d+)W 80\+ Titanium unit/)[1];
+    const gpu = originalMessage.content.match(/(NVIDIA GeForce|AMD Radeon) [^ ]+/)[0];
+    const clockIncrease = originalMessage.content.match(/(\d+)MHz higher/)[1];
+    return `Upgrading to a ${psuWattage}W 80+ Titanium PSU is a solid move! The fact that you're able to push your ${gpu} ${clockIncrease}MHz higher demonstrates the importance of clean, stable power delivery. Have you noticed any improvements in voltage stability or ripple? High-end PSUs can sometimes allow for lower voltage requirements due to cleaner power delivery. Also, the improved efficiency might give you a bit more thermal headroom in your case. Don't forget to check if your new PSU has features like multi-rail designs or OCP thresholds that you might want to adjust for optimal performance.`;
+  }
+  
+  if (originalMessage.content.includes("monitor overclocking")) {
+    const originalRefreshRate = originalMessage.content.match(/my (\d+)Hz panel/)[1];
+    const newRefreshRate = originalMessage.content.match(/to (\d+)Hz stable/)[1];
+    return `Congrats on successfully overclocking your monitor from ${originalRefreshRate}Hz to ${newRefreshRate}Hz! That's a nice boost, especially for fast-paced games. Have you checked for frame skipping using the UFO Test? Sometimes, monitors can report a higher refresh rate without actually displaying all the frames. Also, keep an eye on your monitor's temperature - some panels can degrade faster when pushed beyond their rated specs. Have you considered tweaking your monitor's overdrive settings to reduce motion blur at the higher refresh rate?`;
+  }
+  
+  if (originalMessage.content.includes("FCLK and memory controller")) {
+    return `Getting your FCLK stable at 1900MHz with tight timings is impressive! The impact on latency-sensitive applications can indeed be significant. For pushing it further, have you tried increasing SOC voltage slightly? Sometimes, a small bump can stabilize higher FCLK speeds. Also, don't forget about VDDG CCD and VDDG IOD voltages - they can be crucial for stabilizing high FCLK. Be careful though, as too high voltages can actually reduce stability. Have you run extensive memory tests to ensure there are no errors at this speed?`;
+  }
+  
+  if (originalMessage.content.includes("laptop overclocking")) {
+    const cpu = originalMessage.content.match(/mobile (Intel Core|AMD Ryzen|AMD FX|AMD Phenom|AMD Athlon) [^ ]+/)[1];
+    const undervoltAmount = originalMessage.content.match(/undervolt .+ by (\d+)mV/)[1];
+    const boostIncrease = originalMessage.content.match(/increase the boost clock by (\d+)MHz/)[1];
+    return `Nice work on optimizing your laptop's ${cpu}! Undervolting by ${undervoltAmount}mV and increasing boost by ${boostIncrease}MHz is a solid result. Have you looked into repasting your CPU and GPU? In laptops, thermal paste quality and application can make a huge difference. Also, consider using a laptop cooling pad to further improve thermal performance. Don't forget to monitor for power limit throttling - some laptops can benefit from increasing TDP limits if the cooling solution can handle it.`;
+  }
+  
+  if (originalMessage.content.includes("budget overclocking challenge")) {
+    const cpu = originalMessage.content.match(/old (Intel Core|AMD Ryzen|AMD FX|AMD Phenom|AMD Athlon) [^ ]+/)[1];
+    const clockSpeed = originalMessage.content.match(/stable at ([\d.]+)GHz/)[1];
+    const coolerCost = originalMessage.content.match(/(\d+)\$ cooler/)[1];
+    return `That's a fun budget overclocking project! Getting an old ${cpu} to ${clockSpeed}GHz with just a $${coolerCost} cooler is impressive. Have you considered modding the cooler for even better performance? Sometimes, adding a second fan or replacing the stock fan can yield significant improvements. Also, don't underestimate the impact of good case airflow, even in budget builds. Have you tried undervolting in combination with your overclock? It might allow for even higher clocks within your thermal limits.`;
+  }
+  
+  if (originalMessage.content.includes("VRM cooling")) {
+    const tempDrop = originalMessage.content.match(/Temperatures dropped by (\d+)°C/)[1];
+    return `Adding heatsinks to your VRMs is a smart move! A ${tempDrop}°C drop in VRM temperatures can indeed lead to more stable overclocks. Have you considered adding a small fan directed at the VRMs for even better cooling? Some overclockers use old GPU fans for this purpose. Also, don't forget about the back of the motherboard - some boards benefit from cooling the back of the VRM area as well. If you're feeling adventurous, replacing the thermal pads between the VRMs and heatsinks with higher quality ones can sometimes yield significant improvements.`;
+  }
+  
+  if (originalMessage.content.includes("BIOS modding")) {
+    return `BIOS modding can indeed open up a whole new world of tweaking options! It's definitely not for the faint of heart, but the results can be impressive. Have you looked into custom BIOS builds from overclocker communities? Sometimes they include optimizations and unlocked settings beyond what you can achieve with just unlocking hidden options. Be extremely cautious though - a bad BIOS flash can brick your motherboard. Always have a backup plan, like a hardware BIOS flasher. Have you explored options like increasing VRM switching frequency or adjusting Load-Line Calibration beyond stock limits?`;
+  }
+  
+  if (originalMessage.content.includes("competitive overclocking")) {
+    return `Getting into competitive overclocking is an exciting step! Investing in LN2 gear and golden sample CPUs is a good start. Have you considered joining online overclocking communities or forums? They're great sources of information and often have members willing to mentor newcomers. Also, look into local overclocking meetups or competitions - hands-on experience is invaluable. Don't forget about the importance of a good motherboard for extreme overclocking - features like voltage measurement points and LN2 modes can make a big difference. Start with easier benchmarks like SuperPi and gradually work your way up to more complex ones. And always prioritize safety when working with extreme cooling methods!`;
+  }
+  
+  if (originalMessage.content.includes("overclocking for emulation")) {
+    const cpu = originalMessage.content.match(/(Intel Core|AMD Ryzen|AMD FX|AMD Phenom|AMD Athlon) [^ ]+/)[0];
+    const clockSpeed = originalMessage.content.match(/single-core boost to ([\d.]+)GHz/)[1];
+    const game = originalMessage.content.match(/difference in games like (.+?)\./)[1];
+    return `Overclocking your ${cpu} to ${clockSpeed}GHz for emulation is a great idea! The improved performance in ${game} shows how beneficial high single-core speeds can be for emulators. Have you looked into per-core overclocking? Some CPUs allow you to push a single core higher than others, which can be perfect for emulation. Also, don't forget about the importance of low latency RAM for many emulators. Have you tried tweaking your memory timings specifically for emulation workloads?`;
+  }
+  
+  if (originalMessage.content.includes("memory timing tweaking")) {
+    return `Nice work on tightening those memory timings! Reducing tRFC, tRRD_S, and tFAW can indeed have a noticeable impact on memory performance. Have you looked into secondary and tertiary timings as well? Sometimes, tweaks to less commonly adjusted timings like tWR, tRTP, or tFAW can yield surprising performance gains. Also, don't forget about the relationship between timings - sometimes loosening one timing slightly can allow for much tighter settings on others. Have you tried running memory-intensive benchmarks like AIDA64's cache and memory benchmark to quantify your improvements?`;
+  }
+  
+  return `Interesting overclock! Have you stress tested for stability? It's always good to run a mix of synthetic benchmarks and real-world workloads to ensure your system is rock solid. Consider using tools like Prime95, OCCT, and MemTest86 for comprehensive stability testing. Also, don't forget to monitor temperatures and voltages during extended stress tests - sometimes instabilities only show up after hours of heavy load.`;
 }
 
 function addMessage(replyTo = null) {
@@ -415,6 +626,7 @@ function addMessage(replyTo = null) {
   `;
   
   messagesContainer.appendChild(messageElement);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
   // 50% chance to generate a reply
   if (Math.random() < 0.5) {
