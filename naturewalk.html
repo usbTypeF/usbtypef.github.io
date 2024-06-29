@@ -1,0 +1,364 @@
+<html><head><base href="https://websim.ai/c/3d-nature-explorer"><title>3D Nature Explorer</title><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script><style>body { margin: 0; overflow: hidden; } #inventory { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.5); color: white; padding: 10px; border-radius: 5px; font-family: Arial, sans-serif; }</style></head><body>
+<div id="inventory">Inventory: Empty</div>
+<script>
+// Set up the scene, camera, and renderer
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Set very dark purple sky
+scene.background = new THREE.Color(0x1a0033);
+
+// Create a smaller ground (1/3 of the original size)
+const groundSize = 666;
+const groundGeometry = new THREE.PlaneGeometry(groundSize, groundSize);
+const groundMaterial = new THREE.MeshBasicMaterial({ color: 0x228B22 });
+const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+ground.rotation.x = -Math.PI / 2;
+scene.add(ground);
+
+// Create trees with varied sizes
+function createTree(x, z) {
+    const scaleFactor = Math.random() * 1.5 + 0.5;
+    const trunkHeight = 2 * scaleFactor;
+    const leavesHeight = 2 * scaleFactor;
+    const trunkRadius = 0.2 * scaleFactor;
+    const leavesRadius = 1 * scaleFactor;
+
+    const trunkGeometry = new THREE.CylinderGeometry(trunkRadius, trunkRadius, trunkHeight, 8);
+    const trunkMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
+    const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+    trunk.position.set(x, trunkHeight / 2, z);
+
+    const leavesGeometry = new THREE.ConeGeometry(leavesRadius, leavesHeight, 8);
+    const leavesMaterial = new THREE.MeshBasicMaterial({ color: 0x228B22 });
+    const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+    leaves.position.set(x, trunkHeight + leavesHeight / 2, z);
+
+    scene.add(trunk);
+    scene.add(leaves);
+}
+
+for (let i = 0; i < 1000; i++) {
+    createTree(Math.random() * 600 - 300, Math.random() * 600 - 300);
+}
+
+// Create mountains on the edge of the map
+function createMountain(x, z, size) {
+    const mountainGeometry = new THREE.ConeGeometry(size, size * 1.5, 4);
+    const mountainMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
+    const mountain = new THREE.Mesh(mountainGeometry, mountainMaterial);
+    mountain.position.set(x, 0, z);
+    scene.add(mountain);
+}
+
+// Create mountains on the edges
+for (let i = 0; i < 40; i++) {
+    const angle = (i / 40) * Math.PI * 2;
+    const radius = groundSize / 2;
+    const x = Math.cos(angle) * radius;
+    const z = Math.sin(angle) * radius;
+    createMountain(x, z, Math.random() * 30 + 20);
+}
+
+// Create a river
+const riverGeometry = new THREE.PlaneGeometry(10, 666);
+const riverMaterial = new THREE.MeshBasicMaterial({ color: 0x4169E1 });
+const river = new THREE.Mesh(riverGeometry, riverMaterial);
+river.rotation.x = -Math.PI / 2;
+river.position.set(33, 0.1, 0);
+scene.add(river);
+
+// Create sticks
+const sticks = [];
+function createStick(x, z) {
+    const stickGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8);
+    const stickMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
+    const stick = new THREE.Mesh(stickGeometry, stickMaterial);
+    stick.position.set(x, 0.25, z);
+    stick.rotation.x = Math.PI / 2;
+    scene.add(stick);
+    sticks.push(stick);
+}
+
+for (let i = 0; i < 200; i++) {
+    createStick(Math.random() * 600 - 300, Math.random() * 600 - 300);
+}
+
+// Create flowers
+function createFlower(x, z) {
+    const stemGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 8);
+    const stemMaterial = new THREE.MeshBasicMaterial({ color: 0x00FF00 });
+    const stem = new THREE.Mesh(stemGeometry, stemMaterial);
+    stem.position.set(x, 0.15, z);
+
+    const petalGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+    const petalMaterial = new THREE.MeshBasicMaterial({ color: Math.random() * 0xFFFFFF });
+    const petal = new THREE.Mesh(petalGeometry, petalMaterial);
+    petal.position.set(x, 0.3, z);
+
+    scene.add(stem);
+    scene.add(petal);
+}
+
+for (let i = 0; i < 2000; i++) {
+    createFlower(Math.random() * 600 - 300, Math.random() * 600 - 300);
+}
+
+// Create pebbles
+const pebbles = [];
+function createPebble(x, z) {
+    const pebbleGeometry = new THREE.SphereGeometry(Math.random() * 0.1 + 0.05, 8, 8);
+    const pebbleMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
+    const pebble = new THREE.Mesh(pebbleGeometry, pebbleMaterial);
+    pebble.position.set(x, 0.05, z);
+    scene.add(pebble);
+    pebbles.push(pebble);
+}
+
+for (let i = 0; i < 2000; i++) {
+    createPebble(Math.random() * 600 - 300, Math.random() * 600 - 300);
+}
+
+// Create boulders with random sizes, sitting halfway in the ground
+const boulders = [];
+function createBoulder(x, z) {
+    const boulderSize = Math.random() * 3 + 1; // Random size between 1 and 4
+    const boulderGeometry = new THREE.SphereGeometry(boulderSize, 8, 8);
+    const boulderMaterial = new THREE.MeshBasicMaterial({ color: 0x606060 });
+    const boulder = new THREE.Mesh(boulderGeometry, boulderMaterial);
+    boulder.position.set(x, boulderSize / 2, z); // Set y to half the size to embed in ground
+    scene.add(boulder);
+    boulders.push(boulder);
+}
+
+for (let i = 0; i < 50; i++) {
+    createBoulder(Math.random() * 600 - 300, Math.random() * 600 - 300);
+}
+
+// Create stars
+function createStar() {
+    const starGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+    const starMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+    const star = new THREE.Mesh(starGeometry, starMaterial);
+    const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(1000));
+    star.position.set(x, y + 400, z);
+    scene.add(star);
+}
+
+for (let i = 0; i < 2000; i++) {
+    createStar();
+}
+
+// Create the moon
+const moonGeometry = new THREE.SphereGeometry(20, 32, 32);
+const moonMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+moon.position.set(200, 300, -100);
+scene.add(moon);
+
+// Create ants
+const ants = [];
+function createAnt(x, z) {
+    const antGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+    const antMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const ant = new THREE.Mesh(antGeometry, antMaterial);
+    ant.position.set(x, 0.05, z);
+    scene.add(ant);
+    ants.push(ant);
+}
+
+for (let i = 0; i < 100; i++) {
+    createAnt(Math.random() * 600 - 300, Math.random() * 600 - 300);
+}
+
+// Set up camera and controls
+camera.position.set(0, 1, 5);
+
+let isMouseDown = false;
+let mouseX = 0;
+let mouseY = 0;
+
+// Movement variables
+let moveForward = false;
+let moveBackward = false;
+let moveLeft = false;
+let moveRight = false;
+
+document.addEventListener('mousedown', onMouseDown);
+document.addEventListener('mouseup', onMouseUp);
+document.addEventListener('mousemove', onMouseMove);
+document.addEventListener('keydown', onKeyDown);
+document.addEventListener('keyup', onKeyUp);
+
+function onMouseDown(event) {
+    isMouseDown = true;
+}
+
+function onMouseUp(event) {
+    isMouseDown = false;
+}
+
+function onMouseMove(event) {
+    if (isMouseDown) {
+        const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+        mouseX -= movementX * 0.002;
+        mouseY -= movementY * 0.002;
+
+        mouseY = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, mouseY));
+
+        camera.rotation.y = mouseX;
+        camera.rotation.x = mouseY;
+    }
+}
+
+function onKeyDown(event) {
+    switch (event.code) {
+        case 'KeyW': moveForward = true; break;
+        case 'KeyS': moveBackward = true; break;
+        case 'KeyA': moveLeft = true; break;
+        case 'KeyD': moveRight = true; break;
+    }
+}
+
+function onKeyUp(event) {
+    switch (event.code) {
+        case 'KeyW': moveForward = false; break;
+        case 'KeyS': moveBackward = false; break;
+        case 'KeyA': moveLeft = false; break;
+        case 'KeyD': moveRight = false; break;
+    }
+}
+
+// Inventory system
+const inventory = {
+    sticks: 0,
+    pebbles: 0,
+    ants: 0
+};
+
+function updateInventoryDisplay() {
+    const inventoryDiv = document.getElementById('inventory');
+    inventoryDiv.textContent = `Inventory: Sticks: ${inventory.sticks}, Pebbles: ${inventory.pebbles}, Ants: ${inventory.ants}`;
+}
+
+// Collection functions
+function checkStickCollection() {
+    sticks.forEach((stick, index) => {
+        if (stick.position.distanceTo(camera.position) < 2) {
+            scene.remove(stick);
+            sticks.splice(index, 1);
+            inventory.sticks++;
+            updateInventoryDisplay();
+        }
+    });
+}
+
+function checkPebbleCollection() {
+    pebbles.forEach((pebble, index) => {
+        if (pebble.position.distanceTo(camera.position) < 2) {
+            scene.remove(pebble);
+            pebbles.splice(index, 1);
+            inventory.pebbles++;
+            updateInventoryDisplay();
+        }
+    });
+}
+
+function checkAntCollection() {
+    ants.forEach((ant, index) => {
+        if (ant.position.distanceTo(camera.position) < 1) {
+            scene.remove(ant);
+            ants.splice(index, 1);
+            inventory.ants++;
+            updateInventoryDisplay();
+        }
+    });
+}
+
+// Collision detection
+function checkCollision(newPosition) {
+    for (const boulder of boulders) {
+        const distance = newPosition.distanceTo(boulder.position);
+        if (distance < boulder.geometry.parameters.radius + 1) { // +1 for player "radius"
+            return true;
+        }
+    }
+    return false;
+}
+
+// Animation loop
+function animate() {
+    requestAnimationFrame(animate);
+
+    // Move the camera
+    const speed = 0.09;
+    const direction = new THREE.Vector3();
+    const rotation = camera.rotation.y;
+
+    if (moveForward) {
+        direction.z -= Math.cos(rotation) * speed;
+        direction.x -= Math.sin(rotation) * speed;
+    }
+    if (moveBackward) {
+        direction.z += Math.cos(rotation) * speed;
+        direction.x += Math.sin(rotation) * speed;
+    }
+    if (moveLeft) {
+        direction.x -= Math.cos(rotation) * speed;
+        direction.z += Math.sin(rotation) * speed;
+    }
+    if (moveRight) {
+        direction.x += Math.cos(rotation) * speed;
+        direction.z -= Math.sin(rotation) * speed;
+    }
+
+    const newPosition = camera.position.clone().add(direction);
+
+    // Check for collisions before moving
+    if (!checkCollision(newPosition)) {
+        camera.position.copy(newPosition);
+    }
+
+    // Keep the camera at a fixed height
+    camera.position.y = 1;
+
+    // Prevent the camera from going out of bounds
+    camera.position.x = Math.max(-333, Math.min(333, camera.position.x));
+    camera.position.z = Math.max(-333, Math.min(333, camera.position.z));
+
+    // Move ants
+    ants.forEach(ant => {
+        ant.position.x += (Math.random() - 0.5) * 0.1;
+        ant.position.z += (Math.random() - 0.5) * 0.1;
+        
+        // Keep ants within bounds
+        ant.position.x = Math.max(-333, Math.min(333, ant.position.x));
+        ant.position.z = Math.max(-333, Math.min(333, ant.position.z));
+    });
+
+    checkStickCollection();
+    checkPebbleCollection();
+    checkAntCollection();
+    renderer.render(scene, camera);
+}
+
+animate();
+
+// Handle window resizing
+window.addEventListener('resize', onWindowResize, false);
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// Initial inventory display update
+updateInventoryDisplay();
+</script>
+</body></html>
