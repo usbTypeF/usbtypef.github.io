@@ -1,0 +1,174 @@
+<html><head><base href="https://xp.netlify.app/"><title>Windows XP Emulator - Desktop</title> 
+<style>
+body {
+  background: #008080;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: Tahoma, Arial, sans-serif;
+  overflow: hidden;
+  position: relative;
+}
+
+iframe {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  z-index: 1;
+}
+
+.taskbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30px;
+  background: linear-gradient(to bottom, #2451c6 0%, #1e409e 100%);
+  border-top: 1px solid #0266d4;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  z-index: 10;
+}
+
+.start-button {
+  background: url(start-button.png) no-repeat;
+  background-size: 100%;
+  height: 27px;
+  width: 104px;
+  border: none;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+}
+
+.taskbar .button {
+  border: none;
+  background: #254fb8;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-right: 5px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.taskbar .clock {
+  margin-left: auto;
+  font-size: 11px;
+  color: white;
+}
+
+.desktop {
+  height: calc(100% - 30px);
+  width: 100%;
+  position: relative;
+}
+
+.icons {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+.icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 75px;
+  cursor: pointer;
+}
+
+.icon img {
+  margin-bottom: 5px;
+}
+
+.icon span {
+  color: white;
+  font-size: 12px; 
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+  text-align: center;
+}
+</style>
+</head>
+<body>
+<div class="desktop">
+  <iframe src="https://geekprank.com/xp-simulator/" frameborder="0"></iframe>
+  
+  <div class="icons">
+    <div class="icon">
+      <a href="https://geekprank.com/xp-simulator/?app=minesweeper">
+        <img src="minesweeper-icon.png" alt="Minesweeper icon" width="48" height="48">
+        <span>Minesweeper</span>
+      </a>
+    </div>
+    <div class="icon">
+      <a href="https://geekprank.com/xp-simulator/?app=solitaire">
+        <img src="solitaire-icon.png" alt="Solitaire icon" width="48" height="48">
+        <span>Solitaire</span>
+      </a>
+    </div>
+    <div class="icon">
+      <a href="https://geekprank.com/xp-simulator/?app=pinball"> 
+        <img src="pinball-icon.png" alt="Pinball icon" width="48" height="48">
+        <span>3D Pinball</span>
+      </a>
+    </div>
+    <div class="icon">
+      <a href="https://geekprank.com/xp-simulator/">
+        <img src="computer-icon.png" alt="My Computer icon" width="48" height="48">
+        <span>My Computer</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="taskbar">
+  <button class="start-button"></button>
+  
+  <div class="toolbar">
+    <button class="button">File</button>
+    <button class="button">Edit</button>
+    <button class="button">View</button>
+    <button class="button">Favorites</button>
+    <button class="button">Tools</button>
+    <button class="button">Help</button>
+  </div>
+  
+  <div class="clock" id="clock"></div>
+</div>
+
+<script>
+function startTime() {
+  const today = new Date();
+  let h = today.getHours();
+  let m = today.getMinutes();
+  let ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12;
+  h = h ? h : 12; 
+  m = checkTime(m);
+  document.getElementById('clock').innerHTML =  h + ":" + m + ' ' + ampm;
+  setTimeout(startTime, 1000);
+}
+
+function checkTime(i) {
+  if (i < 10) {i = "0" + i};
+  return i;
+}
+
+startTime();
+</script>
+
+</body>
+</html>
