@@ -1,0 +1,327 @@
+<html><head><base href="https://websim.ai/c/spectrum-analyzer"><title>WebSim Advanced Spectrum Analyzer with Logarithmic Frequency Scale</title>
+<style>
+  body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #1e1e1e;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  header {
+    background-color: #333333;
+    width: 100%;
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+  }
+  
+  #analyzer-container {
+    width: 95%;
+    max-width: 1400px;
+    margin: 2rem auto;
+    background-color: #2a2a2a;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  canvas {
+    width: 100%;
+    height: 500px;
+    background-color: #000000;
+    border-radius: 5px;
+  }
+  
+  #controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  button, select {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover, select:hover {
+    background-color: #45a049;
+  }
+  
+  button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  select {
+    background-color: #333333;
+    color: #ffffff;
+    border: 1px solid #4CAF50;
+  }
+  
+  #freq-info {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+  
+  footer {
+    margin-top: auto;
+    width: 100%;
+    background-color: #333333;
+    text-align: center;
+    padding: 1rem;
+  }
+  
+  a {
+    color: #4CAF50;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+
+  #scale-type {
+    margin-left: 10px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>WebSim Advanced Spectrum Analyzer with Logarithmic Frequency Scale</h1>
+  </header>
+  
+  <div id="analyzer-container">
+    <canvas id="analyzer"></canvas>
+    <div id="controls">
+      <button id="startStop">Start</button>
+      <select id="vizType">
+        <option value="bars">Bars</option>
+        <option value="line">Line</option>
+      </select>
+      <select id="scale-type">
+        <option value="log">Logarithmic</option>
+        <option value="linear">Linear</option>
+      </select>
+      <button id="fullscreen">Fullscreen</button>
+    </div>
+    <div id="freq-info">Peak Frequency: <span id="peakFreq">0 Hz</span></div>
+  </div>
+  
+  <footer>
+    <p>Created by WebSim AI | <a href="https://websim.ai/c/audio-tools">More Audio Tools</a></p>
+  </footer>
+
+  <script>
+    let audioContext;
+    let analyser;
+    let source;
+    let animationId;
+    let canvas;
+    let ctx;
+    let isRunning = false;
+    
+    const startStopBtn = document.getElementById('startStop');
+    const vizTypeSelect = document.getElementById('vizType');
+    const scaleTypeSelect = document.getElementById('scale-type');
+    const fullscreenBtn = document.getElementById('fullscreen');
+    const peakFreqSpan = document.getElementById('peakFreq');
+    
+    const MIN_FREQ = 20;
+    const MAX_FREQ = 20000;
+    
+    async function setupAudioContext() {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 16384; // Increased for better frequency resolution
+      
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        source = audioContext.createMediaStreamSource(stream);
+        source.connect(analyser);
+      } catch (err) {
+        console.error('Error accessing microphone:', err);
+        alert('Unable to access microphone. Please check your settings and reload the page.');
+      }
+    }
+    
+    function initCanvas() {
+      canvas = document.getElementById('analyzer');
+      ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    
+    function frequencyToX(frequency, canvasWidth, scaleType) {
+      if (scaleType === 'log') {
+        return (Math.log10(frequency) - Math.log10(MIN_FREQ)) / (Math.log10(MAX_FREQ) - Math.log10(MIN_FREQ)) * canvasWidth;
+      } else {
+        return (frequency - MIN_FREQ) / (MAX_FREQ - MIN_FREQ) * canvasWidth;
+      }
+    }
+    
+    function drawBars(dataArray) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      const binCount = analyser.frequencyBinCount;
+      const nyquist = audioContext.sampleRate / 2;
+      const barWidth = 2;
+      
+      for (let i = 0; i < binCount; i++) {
+        const frequency = i * nyquist / binCount;
+        if (frequency < MIN_FREQ || frequency > MAX_FREQ) continue;
+        
+        const x = frequencyToX(frequency, canvas.width, scaleTypeSelect.value);
+        const barHeight = (dataArray[i] / 255) * canvas.height;
+        
+        const hue = (i / binCount) * 360;
+        ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+        
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+      }
+    }
+    
+    function drawLine(dataArray) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      const binCount = analyser.frequencyBinCount;
+      const nyquist = audioContext.sampleRate / 2;
+      
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height);
+      
+      for (let i = 0; i < binCount; i++) {
+        const frequency = i * nyquist / binCount;
+        if (frequency < MIN_FREQ || frequency > MAX_FREQ) continue;
+        
+        const x = frequencyToX(frequency, canvas.width, scaleTypeSelect.value);
+        const y = canvas.height - (dataArray[i] / 255) * canvas.height;
+        
+        ctx.lineTo(x, y);
+      }
+      
+      ctx.strokeStyle = 'rgb(0, 255, 0)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    
+    function getPeakFrequency(dataArray) {
+      let max = 0;
+      let maxIndex = 0;
+      
+      for (let i = 0; i < dataArray.length; i++) {
+        if (dataArray[i] > max) {
+          max = dataArray[i];
+          maxIndex = i;
+        }
+      }
+      
+      const peakFrequency = maxIndex * audioContext.sampleRate / analyser.fftSize;
+      return Math.round(peakFrequency);
+    }
+    
+    function drawFrequencyLabels() {
+      ctx.fillStyle = 'white';
+      ctx.font = '12px Arial';
+      ctx.textAlign = 'center';
+      
+      const frequencies = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000];
+      
+      frequencies.forEach(freq => {
+        const x = frequencyToX(freq, canvas.width, scaleTypeSelect.value);
+        ctx.fillText(`${freq}Hz`, x, canvas.height - 5);
+      });
+    }
+    
+    function draw() {
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(dataArray);
+      
+      switch (vizTypeSelect.value) {
+        case 'bars':
+          drawBars(dataArray);
+          break;
+        case 'line':
+          drawLine(dataArray);
+          break;
+      }
+      
+      drawFrequencyLabels();
+      
+      const peakFreq = getPeakFrequency(dataArray);
+      peakFreqSpan.textContent = `${peakFreq} Hz`;
+      
+      animationId = requestAnimationFrame(draw);
+    }
+    
+    startStopBtn.addEventListener('click', async () => {
+      if (!audioContext) {
+        await setupAudioContext();
+        initCanvas();
+      }
+      
+      if (isRunning) {
+        cancelAnimationFrame(animationId);
+        startStopBtn.textContent = 'Start';
+      } else {
+        draw();
+        startStopBtn.textContent = 'Stop';
+      }
+      
+      isRunning = !isRunning;
+    });
+    
+    fullscreenBtn.addEventListener('click', () => {
+      if (canvas.requestFullscreen) {
+        canvas.requestFullscreen();
+      } else if (canvas.mozRequestFullScreen) {
+        canvas.mozRequestFullScreen();
+      } else if (canvas.webkitRequestFullscreen) {
+        canvas.webkitRequestFullscreen();
+      } else if (canvas.msRequestFullscreen) {
+        canvas.msRequestFullscreen();
+      }
+    });
+    
+    window.addEventListener('resize', () => {
+      if (canvas) {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+      }
+    });
+
+    scaleTypeSelect.addEventListener('change', () => {
+      if (isRunning) {
+        cancelAnimationFrame(animationId);
+        draw();
+      }
+    });
+
+    vizTypeSelect.addEventListener('change', () => {
+      if (isRunning) {
+        cancelAnimationFrame(animationId);
+        draw();
+      }
+    });
+  </script>
+</body></html>

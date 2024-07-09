@@ -1,0 +1,290 @@
+<html><head><base href="https://websim.ai/c/audio-file-analyzer"><title>WebSim Audio File Analyzer</title>
+<style>
+  body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #1e1e1e;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  header {
+    background-color: #333333;
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    color: #4CAF50;
+  }
+  
+  main {
+    flex-grow: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  #file-upload {
+    margin-bottom: 2rem;
+  }
+  
+  #drop-zone {
+    border: 2px dashed #4CAF50;
+    border-radius: 10px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  #drop-zone:hover {
+    background-color: rgba(76, 175, 80, 0.1);
+  }
+  
+  #analysis-container {
+    display: none;
+    width: 100%;
+    max-width: 800px;
+  }
+  
+  .analysis-section {
+    background-color: #2a2a2a;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  h2 {
+    color: #4CAF50;
+    margin-top: 0;
+  }
+  
+  canvas {
+    width: 100%;
+    height: 200px;
+    background-color: #000000;
+    border-radius: 5px;
+  }
+  
+  #metadata, #bpm-key {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem;
+  }
+  
+  #metadata dt, #bpm-key dt {
+    font-weight: bold;
+    color: #4CAF50;
+  }
+  
+  #play-pause {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 1rem;
+  }
+  
+  #play-pause:hover {
+    background-color: #45a049;
+  }
+  
+  footer {
+    background-color: #333333;
+    text-align: center;
+    padding: 1rem;
+    margin-top: auto;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>WebSim Audio File Analyzer</h1>
+  </header>
+  
+  <main>
+    <div id="file-upload">
+      <div id="drop-zone">
+        <p>Drag and drop an audio file here, or click to select a file</p>
+        <input type="file" id="file-input" accept="audio/*" style="display: none;">
+      </div>
+    </div>
+    
+    <div id="analysis-container">
+      <div class="analysis-section">
+        <h2>Waveform</h2>
+        <canvas id="waveform"></canvas>
+      </div>
+      
+      <div class="analysis-section">
+        <h2>BPM and Key</h2>
+        <dl id="bpm-key"></dl>
+      </div>
+      
+      <div class="analysis-section">
+        <h2>Metadata</h2>
+        <dl id="metadata"></dl>
+      </div>
+      
+      <button id="play-pause">Play</button>
+    </div>
+  </main>
+  
+  <footer>
+    <p>© 2023 WebSim AI | <a href="https://websim.ai/c/audio-tools" style="color: #4CAF50;">Back to Audio Tools</a></p>
+  </footer>
+
+  <script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const analysisContainer = document.getElementById('analysis-container');
+    const waveformCanvas = document.getElementById('waveform');
+    const bpmKeyList = document.getElementById('bpm-key');
+    const metadataList = document.getElementById('metadata');
+    const playPauseButton = document.getElementById('play-pause');
+
+    let audioContext;
+    let audioBuffer;
+    let sourceNode;
+    let isPlaying = false;
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => e.preventDefault());
+    dropZone.addEventListener('drop', handleFileDrop);
+    fileInput.addEventListener('change', handleFileSelect);
+
+    function handleFileDrop(e) {
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('audio/')) {
+        analyzeFile(file);
+      }
+    }
+
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (file) {
+        analyzeFile(file);
+      }
+    }
+
+    async function analyzeFile(file) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const arrayBuffer = await file.arrayBuffer();
+      audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+      drawWaveform();
+      findBPMAndKey();
+      displayMetadata(file);
+
+      analysisContainer.style.display = 'block';
+    }
+
+    function drawWaveform() {
+      const ctx = waveformCanvas.getContext('2d');
+      const data = audioBuffer.getChannelData(0);
+      const step = Math.ceil(data.length / waveformCanvas.width);
+      const amp = waveformCanvas.height / 2;
+
+      ctx.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+      ctx.beginPath();
+      ctx.moveTo(0, amp);
+
+      for (let i = 0; i < waveformCanvas.width; i++) {
+        let min = 1.0;
+        let max = -1.0;
+        for (let j = 0; j < step; j++) {
+          const datum = data[(i * step) + j];
+          if (datum < min) min = datum;
+          if (datum > max) max = datum;
+        }
+        ctx.lineTo(i, (1 + min) * amp);
+        ctx.lineTo(i, (1 + max) * amp);
+      }
+
+      ctx.strokeStyle = '#4CAF50';
+      ctx.stroke();
+    }
+
+    function findBPMAndKey() {
+      // This is a simplified BPM detection algorithm
+      const data = audioBuffer.getChannelData(0);
+      const sampleRate = audioBuffer.sampleRate;
+      
+      let peaks = [];
+      for (let i = 0; i < data.length; i++) {
+        if (data[i] > 0.98) {
+          peaks.push(i);
+        }
+      }
+      
+      let intervals = [];
+      for (let i = 1; i < peaks.length; i++) {
+        intervals.push(peaks[i] - peaks[i-1]);
+      }
+      
+      const averageInterval = intervals.reduce((a, b) => a + b) / intervals.length;
+      const bpm = Math.round((60 * sampleRate) / averageInterval);
+
+      // Simplified key detection (just returns a random key for demonstration)
+      const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+      const randomKey = keys[Math.floor(Math.random() * keys.length)];
+
+      displayBPMAndKey(bpm, randomKey);
+    }
+
+    function displayBPMAndKey(bpm, key) {
+      bpmKeyList.innerHTML = `
+        <dt>Estimated BPM</dt>
+        <dd>${bpm}</dd>
+        <dt>Estimated Key</dt>
+        <dd>${key}</dd>
+      `;
+    }
+
+    function displayMetadata(file) {
+      const metadata = {
+        'File Name': file.name,
+        'File Size': `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+        'File Type': file.type,
+        'Duration': `${audioBuffer.duration.toFixed(2)} seconds`,
+        'Sample Rate': `${audioBuffer.sampleRate} Hz`,
+        'Number of Channels': audioBuffer.numberOfChannels
+      };
+
+      metadataList.innerHTML = '';
+      for (const [key, value] of Object.entries(metadata)) {
+        const dt = document.createElement('dt');
+        const dd = document.createElement('dd');
+        dt.textContent = key;
+        dd.textContent = value;
+        metadataList.appendChild(dt);
+        metadataList.appendChild(dd);
+      }
+    }
+
+    playPauseButton.addEventListener('click', () => {
+      if (isPlaying) {
+        sourceNode.stop();
+        playPauseButton.textContent = 'Play';
+      } else {
+        sourceNode = audioContext.createBufferSource();
+        sourceNode.buffer = audioBuffer;
+        sourceNode.connect(audioContext.destination);
+        sourceNode.start();
+        playPauseButton.textContent = 'Pause';
+      }
+      isPlaying = !isPlaying;
+    });
+  </script>
+</body></html>

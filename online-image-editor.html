@@ -1,0 +1,531 @@
+<html><head><base href="Epic Cool Image Editor" />
+<title>Epic Cool Image Editor</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .header {
+    background-color: #333;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+  }
+  .editor-area {
+    display: flex;
+    margin-top: 20px;
+  }
+  .tools {
+    width: 200px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .canvas-area {
+    flex-grow: 1;
+    margin-left: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  #imageCanvas {
+    max-width: 100%;
+    max-height: 600px;
+  }
+  button, input[type="file"] {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  input[type="file"] {
+    background-color: #f9f9f9;
+    color: #333;
+  }
+  .slider {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  #undoBtn {
+    background-color: #f44336;
+  }
+  #curveCanvas {
+    border: 1px solid #ddd;
+    margin-top: 10px;
+  }
+  #resetCurveBtn {
+    background-color: #FFA500;
+  }
+  .curve-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  .curve-controls button {
+    width: 48%;
+  }
+  .rotate-control {
+    margin-top: 10px;
+  }
+  #rotateSlider {
+    width: 100%;
+  }
+  #rotateValue {
+    text-align: center;
+    margin-top: 5px;
+  }
+  .brush-tools {
+    width: 200px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin-left: 20px;
+  }
+  #brushColor {
+    width: 100%;
+    height: 40px;
+    margin-bottom: 10px;
+  }
+  .brush-type {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .brush-type button {
+    width: 48%;
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>Epic Cool Image Editor</h1>
+  </div>
+  <div class="container">
+    <div class="editor-area">
+      <div class="tools">
+        <input type="file" id="imageUpload" accept="image/*">
+        <label for="saturation">Saturation:</label>
+        <input type="range" id="saturation" class="slider" min="0" max="200" value="100">
+        <label for="hue">Hue:</label>
+        <input type="range" id="hue" class="slider" min="0" max="360" value="0">
+        <button id="cropBtn">Crop</button>
+        <div class="rotate-control">
+          <label for="rotateSlider">Rotate:</label>
+          <input type="range" id="rotateSlider" min="-180" max="180" value="0">
+          <div id="rotateValue">0°</div>
+        </div>
+        <button id="applyRotateBtn">Apply Rotation</button>
+        <button id="blurBtn">Blur</button>
+        <button id="edgeDetectionBtn">Edge Detection</button>
+        <button id="undoBtn">Undo</button>
+        <div>
+          <label for="curveSelect">RGB Curves:</label>
+          <select id="curveSelect">
+            <option value="rgb">RGB</option>
+            <option value="r">Red</option>
+            <option value="g">Green</option>
+            <option value="b">Blue</option>
+          </select>
+        </div>
+        <canvas id="curveCanvas" width="200" height="200"></canvas>
+        <div class="curve-controls">
+          <button id="applyCurveBtn">Apply Curve</button>
+          <button id="resetCurveBtn">Reset Curve</button>
+        </div>
+      </div>
+      <div class="canvas-area">
+        <canvas id="imageCanvas"></canvas>
+      </div>
+      <div class="brush-tools">
+        <h3>Brush Tool</h3>
+        <input type="color" id="brushColor" value="#000000">
+        <label for="brushSize">Brush Size:</label>
+        <input type="range" id="brushSize" class="slider" min="1" max="50" value="5">
+        <div class="brush-type">
+          <button id="normalBrush">Normal</button>
+          <button id="airbrush">Airbrush</button>
+          <button id="neonBrush">Neon</button>
+          <button id="patternBrush">Pattern</button>
+        </div>
+        <button id="eraserBtn">Eraser</button>
+        <button id="clearCanvasBtn">Clear Canvas</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('imageCanvas');
+    const ctx = canvas.getContext('2d');
+    let image = new Image();
+    let undoStack = [];
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    // RGB Curves
+    const curveCanvas = document.getElementById('curveCanvas');
+    const curveCtx = curveCanvas.getContext('2d');
+    let curvePoints = {
+      rgb: [{x: 0, y: 200}, {x: 200, y: 0}],
+      r: [{x: 0, y: 200}, {x: 200, y: 0}],
+      g: [{x: 0, y: 200}, {x: 200, y: 0}],
+      b: [{x: 0, y: 200}, {x: 200, y: 0}]
+    };
+    let activeCurve = 'rgb';
+    let isDragging = false;
+    let activePoint = null;
+
+    function saveState() {
+      undoStack.push(canvas.toDataURL());
+    }
+
+    function undo() {
+      if (undoStack.length > 1) {
+        undoStack.pop(); // Remove current state
+        let prevState = undoStack[undoStack.length - 1];
+        let img = new Image();
+        img.onload = function() {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+        }
+        img.src = prevState;
+      }
+    }
+
+    document.getElementById('imageUpload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        image.onload = function() {
+          canvas.width = image.width;
+          canvas.height = image.height;
+          ctx.drawImage(image, 0, 0);
+          saveState();
+        }
+        image.src = event.target.result;
+      }
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('saturation').addEventListener('input', function(e) {
+      applyFilter();
+    });
+
+    document.getElementById('hue').addEventListener('input', function(e) {
+      applyFilter();
+    });
+
+    function applyFilter() {
+      saveState();
+      const saturation = document.getElementById('saturation').value;
+      const hue = document.getElementById('hue').value;
+      ctx.filter = `saturate(${saturation}%) hue-rotate(${hue}deg)`;
+      ctx.drawImage(image, 0, 0);
+    }
+
+    document.getElementById('cropBtn').addEventListener('click', function() {
+      saveState();
+      // Simplified crop: crops to center 50%
+      const cropWidth = canvas.width / 2;
+      const cropHeight = canvas.height / 2;
+      const cropX = canvas.width / 4;
+      const cropY = canvas.height / 4;
+      const imageData = ctx.getImageData(cropX, cropY, cropWidth, cropHeight);
+      canvas.width = cropWidth;
+      canvas.height = cropHeight;
+      ctx.putImageData(imageData, 0, 0);
+    });
+
+    // Rotate functionality
+    const rotateSlider = document.getElementById('rotateSlider');
+    const rotateValue = document.getElementById('rotateValue');
+    const applyRotateBtn = document.getElementById('applyRotateBtn');
+
+    rotateSlider.addEventListener('input', function() {
+      rotateValue.textContent = `${this.value}°`;
+    });
+
+    applyRotateBtn.addEventListener('click', function() {
+      saveState();
+      const angle = parseInt(rotateSlider.value) * Math.PI / 180;
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+      
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+
+      // Translate to center of image
+      tempCtx.translate(canvas.width / 2, canvas.height / 2);
+      
+      // Rotate around the center
+      tempCtx.rotate(angle);
+      
+      // Draw the rotated image centered
+      tempCtx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+
+      // Clear the main canvas and draw the rotated image
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(tempCanvas, 0, 0);
+    });
+
+    document.getElementById('blurBtn').addEventListener('click', function() {
+      saveState();
+      ctx.filter = 'blur(5px)';
+      ctx.drawImage(canvas, 0, 0);
+    });
+
+    document.getElementById('edgeDetectionBtn').addEventListener('click', function() {
+      saveState();
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const v = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        data[i] = data[i + 1] = data[i + 2] = v;
+      }
+      ctx.putImageData(imageData, 0, 0);
+
+      // Apply a simple edge detection filter
+      const edgeData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const edgeDataData = edgeData.data;
+      for (let y = 1; y < canvas.height - 1; y++) {
+        for (let x = 1; x < canvas.width - 1; x++) {
+          const idx = (y * canvas.width + x) * 4;
+          const currentPixel = data[idx];
+          const rightPixel = data[idx + 4];
+          const bottomPixel = data[idx + canvas.width * 4];
+          const edge = Math.abs(currentPixel - rightPixel) + Math.abs(currentPixel - bottomPixel);
+          edgeDataData[idx] = edgeDataData[idx + 1] = edgeDataData[idx + 2] = edge > 30 ? 255 : 0;
+        }
+      }
+      ctx.putImageData(edgeData, 0, 0);
+    });
+
+    document.getElementById('undoBtn').addEventListener('click', function() {
+      undo();
+    });
+
+    // RGB Curves Editor
+    function drawCurve() {
+      curveCtx.clearRect(0, 0, 200, 200);
+      curveCtx.strokeStyle = activeCurve === 'rgb' ? 'black' : activeCurve;
+      curveCtx.beginPath();
+      curveCtx.moveTo(curvePoints[activeCurve][0].x, curvePoints[activeCurve][0].y);
+      
+      for (let i = 1; i < curvePoints[activeCurve].length; i++) {
+        curveCtx.lineTo(curvePoints[activeCurve][i].x, curvePoints[activeCurve][i].y);
+      }
+      
+      curveCtx.stroke();
+
+      // Draw control points
+      curvePoints[activeCurve].forEach(point => {
+        curveCtx.fillStyle = 'red';
+        curveCtx.beginPath();
+        curveCtx.arc(point.x, point.y, 4, 0, 2 * Math.PI);
+        curveCtx.fill();
+      });
+    }
+
+    curveCanvas.addEventListener('mousedown', function(e) {
+      const rect = curveCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      curvePoints[activeCurve].forEach(point => {
+        if (Math.abs(point.x - x) < 5 && Math.abs(point.y - y) < 5) {
+          isDragging = true;
+          activePoint = point;
+        }
+      });
+
+      if (!isDragging) {
+        curvePoints[activeCurve].push({x, y});
+        curvePoints[activeCurve].sort((a, b) => a.x - b.x);
+        drawCurve();
+      }
+    });
+
+    curveCanvas.addEventListener('mousemove', function(e) {
+      if (isDragging && activePoint) {
+        const rect = curveCanvas.getBoundingClientRect();
+        activePoint.x = Math.max(0, Math.min(200, e.clientX - rect.left));
+        activePoint.y = Math.max(0, Math.min(200, e.clientY - rect.top));
+        drawCurve();
+      }
+    });
+
+    curveCanvas.addEventListener('mouseup', function() {
+      isDragging = false;
+      activePoint = null;
+    });
+
+    document.getElementById('curveSelect').addEventListener('change', function(e) {
+      activeCurve = e.target.value;
+      drawCurve();
+    });
+
+    document.getElementById('applyCurveBtn').addEventListener('click', function() {
+      saveState();
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+
+      for (let i = 0; i < data.length; i += 4) {
+        if (activeCurve === 'rgb' || activeCurve === 'r') {
+          data[i] = applyCurveToChannel(data[i], 'r');
+        }
+        if (activeCurve === 'rgb' || activeCurve === 'g') {
+          data[i + 1] = applyCurveToChannel(data[i + 1], 'g');
+        }
+        if (activeCurve === 'rgb' || activeCurve === 'b') {
+          data[i + 2] = applyCurveToChannel(data[i + 2], 'b');
+        }
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+    });
+
+    function applyCurveToChannel(value, channel) {
+      const curve = curvePoints[channel === 'rgb' ? activeCurve : channel];
+      const x = value / 255 * 200;
+      let y;
+
+      for (let i = 0; i < curve.length - 1; i++) {
+        if (x >= curve[i].x && x <= curve[i + 1].x) {
+          const t = (x - curve[i].x) / (curve[i + 1].x - curve[i].x);
+          y = curve[i].y + t * (curve[i + 1].y - curve[i].y);
+          break;
+        }
+      }
+
+      return Math.max(0, Math.min(255, (200 - y) / 200 * 255));
+    }
+
+    function resetCurve() {
+      curvePoints[activeCurve] = [{x: 0, y: 200}, {x: 200, y: 0}];
+      drawCurve();
+    }
+
+    document.getElementById('resetCurveBtn').addEventListener('click', resetCurve);
+
+    drawCurve();
+
+    // Brush Tool
+    const brushColor = document.getElementById('brushColor');
+    const brushSize = document.getElementById('brushSize');
+    const eraserBtn = document.getElementById('eraserBtn');
+    const clearCanvasBtn = document.getElementById('clearCanvasBtn');
+    let currentBrush = 'normal';
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    function startDrawing(e) {
+      isDrawing = true;
+      [lastX, lastY] = getMousePos(canvas, e);
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      const [x, y] = getMousePos(canvas, e);
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = brushColor.value;
+      ctx.lineWidth = brushSize.value;
+      ctx.lineCap = 'round';
+      
+      switch(currentBrush) {
+        case 'normal':
+          ctx.stroke();
+          break;
+        case 'airbrush':
+          for (let i = 0; i < 20; i++) {
+            ctx.beginPath();
+            ctx.arc(x + Math.random() * 10 - 5, y + Math.random() * 10 - 5, 1, 0, Math.PI * 2);
+            ctx.fillStyle = brushColor.value;
+            ctx.fill();
+          }
+          break;
+        case 'neon':
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = brushColor.value;
+          ctx.strokeStyle = 'white';
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          break;
+        case 'pattern':
+          const pattern = ctx.createPattern(createPatternCanvas(), 'repeat');
+          ctx.strokeStyle = pattern;
+          ctx.stroke();
+          break;
+      }
+      
+      [lastX, lastY] = [x, y];
+    }
+
+    function stopDrawing() {
+      isDrawing = false;
+    }
+
+    function getMousePos(canvas, evt) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return [
+        (evt.clientX - rect.left) * scaleX,
+        (evt.clientY - rect.top) * scaleY
+      ];
+    }
+
+    function createPatternCanvas() {
+      const patternCanvas = document.createElement('canvas');
+      const patternCtx = patternCanvas.getContext('2d');
+      patternCanvas.width = 10;
+      patternCanvas.height = 10;
+      patternCtx.fillStyle = brushColor.value;
+      patternCtx.fillRect(0, 0, 5, 5);
+      patternCtx.fillRect(5, 5, 5, 5);
+      return patternCanvas;
+    }
+
+    document.getElementById('normalBrush').addEventListener('click', () => currentBrush = 'normal');
+    document.getElementById('airbrush').addEventListener('click', () => currentBrush = 'airbrush');
+    document.getElementById('neonBrush').addEventListener('click', () => currentBrush = 'neon');
+    document.getElementById('patternBrush').addEventListener('click', () => currentBrush = 'pattern');
+
+    eraserBtn.addEventListener('click', function() {
+      currentBrush = 'normal';
+      brushColor.value = '#FFFFFF';
+    });
+
+    clearCanvasBtn.addEventListener('click', function() {
+      saveState();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+  </script>
+</body></html>
