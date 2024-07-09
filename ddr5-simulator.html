@@ -1,0 +1,414 @@
+<html><head><base href="https://websim.ai"/>
+<title>Advanced DDR5 Overclocking Simulator</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    margin: 0;
+    padding: 20px;
+    color: #e0e0e0;
+  }
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255,0,0,0.2);
+  }
+  h1, h2 {
+    color: #ff4444;
+    text-align: center;
+  }
+  select, input[type="range"] {
+    width: 100%;
+    margin: 5px 0;
+    padding: 5px;
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    border: 1px solid #ff4444;
+  }
+  label {
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
+    color: #ff8888;
+  }
+  #frequencyValue, #voltageValue, #stabilityStatus {
+    font-size: 1.2em;
+    margin: 10px 0;
+    color: #ff4444;
+  }
+  #stabilityStatus {
+    font-weight: bold;
+  }
+  .slider-container {
+    margin: 20px 0;
+  }
+  .stability-meter {
+    width: 100%;
+    height: 20px;
+    background-color: #2a2a2a;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  #stabilityBar {
+    height: 100%;
+    width: 100%;
+    background-color: #ff4444;
+    transition: width 0.3s ease;
+  }
+  .timing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  .timing-item {
+    font-size: 0.9em;
+  }
+  .timing-item label {
+    display: inline-block;
+    width: 60px;
+    margin-right: 5px;
+  }
+  .timing-item select {
+    width: calc(100% - 65px);
+  }
+  /* Custom styles for slider */
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 10px;
+    background: #2a2a2a;
+    outline: none;
+    border-radius: 5px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #ff4444;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #ff4444;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Advanced DDR5 Overclocking Simulator</h1>
+  
+  <label for="cpu">Select CPU:</label>
+  <select id="cpu">
+    <optgroup label="Intel 12th Gen">
+      <option value="intel_12900k">Intel Core i9-12900K</option>
+      <option value="intel_12700k">Intel Core i7-12700K</option>
+      <option value="intel_12600k">Intel Core i5-12600K</option>
+    </optgroup>
+    <optgroup label="Intel 13th Gen">
+      <option value="intel_13900k">Intel Core i9-13900K</option>
+      <option value="intel_13700k">Intel Core i7-13700K</option>
+      <option value="intel_13600k">Intel Core i5-13600K</option>
+    </optgroup>
+    <optgroup label="Intel 14th Gen">
+      <option value="intel_14900k">Intel Core i9-14900K</option>
+      <option value="intel_14700k">Intel Core i7-14700K</option>
+      <option value="intel_14600k">Intel Core i5-14600K</option>
+    </optgroup>
+    <optgroup label="AMD Ryzen 7000">
+      <option value="amd_7950x">AMD Ryzen 9 7950X</option>
+      <option value="amd_7900x">AMD Ryzen 9 7900X</option>
+      <option value="amd_7700x">AMD Ryzen 7 7700X</option>
+      <option value="amd_7600x">AMD Ryzen 5 7600X</option>
+    </optgroup>
+    <optgroup label="AMD Ryzen 7000X3D">
+      <option value="amd_7950x3d">AMD Ryzen 9 7950X3D</option>
+      <option value="amd_7900x3d">AMD Ryzen 9 7900X3D</option>
+      <option value="amd_7800x3d">AMD Ryzen 7 7800X3D</option>
+    </optgroup>
+  </select>
+
+  <label for="motherboard">Select Motherboard:</label>
+  <select id="motherboard"></select>
+
+  <label for="ram_ic">Select RAM IC:</label>
+  <select id="ram_ic">
+    <option value="samsung_b">Samsung B-die</option>
+    <option value="hynix_a">SK Hynix A-die</option>
+    <option value="micron_b">Micron B-die</option>
+  </select>
+
+  <div class="slider-container">
+    <label for="frequency">Memory Frequency:</label>
+    <input type="range" id="frequency" min="4800" max="10000" step="100" value="4800">
+    <div id="frequencyValue">4800 MHz</div>
+  </div>
+
+  <div class="slider-container">
+    <label for="voltage">DRAM Voltage:</label>
+    <input type="range" id="voltage" min="1.0" max="1.6" step="0.01" value="1.1">
+    <div id="voltageValue">1.10 V</div>
+  </div>
+
+  <div id="stabilityStatus">System Stability: Stable</div>
+  <div class="stability-meter">
+    <div id="stabilityBar"></div>
+  </div>
+
+  <h2>Memory Timings</h2>
+  <div class="timing-grid">
+    <div class="timing-item">
+      <label for="tCL">tCL:</label>
+      <select id="tCL"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tRCD">tRCD:</label>
+      <select id="tRCD"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tRP">tRP:</label>
+      <select id="tRP"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tRAS">tRAS:</label>
+      <select id="tRAS"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tRC">tRC:</label>
+      <select id="tRC"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tWR">tWR:</label>
+      <select id="tWR"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tRFC">tRFC:</label>
+      <select id="tRFC"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tRRD_S">tRRD_S:</label>
+      <select id="tRRD_S"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tRRD_L">tRRD_L:</label>
+      <select id="tRRD_L"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tFAW">tFAW:</label>
+      <select id="tFAW"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tCWL">tCWL:</label>
+      <select id="tCWL"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tRTP">tRTP:</label>
+      <select id="tRTP"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tWTR_S">tWTR_S:</label>
+      <select id="tWTR_S"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tWTR_L">tWTR_L:</label>
+      <select id="tWTR_L"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tRDRD_sg">tRDRD_sg:</label>
+      <select id="tRDRD_sg"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tRDRD_dg">tRDRD_dg:</label>
+      <select id="tRDRD_dg"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tWRWR_sg">tWRWR_sg:</label>
+      <select id="tWRWR_sg"></select>
+    </div>
+    <div class="timing-item">
+      <label for="tWRWR_dg">tWRWR_dg:</label>
+      <select id="tWRWR_dg"></select>
+    </div>
+  </div>
+</div>
+
+<script>
+  const frequencySlider = document.getElementById('frequency');
+  const frequencyValue = document.getElementById('frequencyValue');
+  const voltageSlider = document.getElementById('voltage');
+  const voltageValue = document.getElementById('voltageValue');
+  const stabilityStatus = document.getElementById('stabilityStatus');
+  const stabilityBar = document.getElementById('stabilityBar');
+  const motherboardSelect = document.getElementById('motherboard');
+  const ramIcSelect = document.getElementById('ram_ic');
+  const cpuSelect = document.getElementById('cpu');
+
+  const timings = {
+    tCL: { min: 28, max: 40 },
+    tRCD: { min: 28, max: 40 },
+    tRP: { min: 28, max: 40 },
+    tRAS: { min: 32, max: 60 },
+    tRC: { min: 60, max: 100 },
+    tWR: { min: 10, max: 30 },
+    tRFC: { min: 180, max: 350 },
+    tRRD_S: { min: 4, max: 8 },
+    tRRD_L: { min: 4, max: 10 },
+    tFAW: { min: 16, max: 40 },
+    tCWL: { min: 12, max: 28 },
+    tRTP: { min: 5, max: 12 },
+    tWTR_S: { min: 1, max: 6 },
+    tWTR_L: { min: 2, max: 12 },
+    tRDRD_sg: { min: 6, max: 12 },
+    tRDRD_dg: { min: 4, max: 8 },
+    tWRWR_sg: { min: 6, max: 12 },
+    tWRWR_dg: { min: 4, max: 8 }
+  };
+
+  const motherboards = {
+    intel: [
+      { value: "asus_z690", name: "ASUS ROG Maximus Z690 Hero" },
+      { value: "msi_z690", name: "MSI MEG Z690 UNIFY-X" },
+      { value: "gigabyte_z690", name: "GIGABYTE Z690 AORUS MASTER" },
+      { value: "asrock_z690", name: "ASRock Z690 Taichi" },
+      { value: "asus_z790_apex", name: "ASUS ROG Maximus Z790 Apex" },
+      { value: "msi_z790", name: "MSI MPG Z790 Carbon WiFi" },
+      { value: "gigabyte_z790", name: "GIGABYTE Z790 AORUS MASTER" },
+      { value: "asrock_z790", name: "ASRock Z790 Taichi" },
+      { value: "evga_z790_dark", name: "EVGA Z790 DARK K|NGP|N" }
+    ],
+    amd: [
+      { value: "asus_x670e", name: "ASUS ROG Crosshair X670E Hero" },
+      { value: "msi_x670e", name: "MSI MEG X670E ACE" },
+      { value: "gigabyte_x670e", name: "GIGABYTE X670E AORUS MASTER" },
+      { value: "asrock_x670e", name: "ASRock X670E Taichi" },
+      { value: "asus_x670e_gene", name: "ASUS ROG CROSSHAIR X670E GENE" },
+      { value: "msi_x670e_godlike", name: "MSI MEG X670E GODLIKE" },
+      { value: "gigabyte_x670e_xtreme", name: "GIGABYTE X670E AORUS XTREME" },
+      { value: "asrock_x670e_pg", name: "ASRock X670E PG Lightning" }
+    ]
+  };
+
+  function populateTimingDropdowns() {
+    for (const [timing, range] of Object.entries(timings)) {
+      const select = document.getElementById(timing);
+      for (let i = range.min; i <= range.max; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        select.appendChild(option);
+      }
+    }
+  }
+
+  function updateMotherboardOptions() {
+    const selectedCpu = cpuSelect.value;
+    const platform = selectedCpu.startsWith('amd') ? 'amd' : 'intel';
+    
+    motherboardSelect.innerHTML = '';
+    motherboards[platform].forEach(mobo => {
+      const option = document.createElement('option');
+      option.value = mobo.value;
+      option.textContent = mobo.name;
+      motherboardSelect.appendChild(option);
+    });
+    
+    updateSystem();
+  }
+
+  function updateSystem() {
+    const freq = parseInt(frequencySlider.value);
+    const voltage = parseFloat(voltageSlider.value);
+    const selectedMotherboard = motherboardSelect.value;
+    const selectedRamIc = ramIcSelect.value;
+    const selectedCpu = cpuSelect.value;
+    
+    frequencyValue.textContent = `${freq} MHz`;
+    voltageValue.textContent = `${voltage.toFixed(2)} V`;
+    
+    let stability = 100;
+    
+    const isAdieHighFreqCombo = (selectedRamIc === 'hynix_a' && 
+      (selectedMotherboard === 'evga_z790_dark' || selectedMotherboard === 'asus_z790_apex' || selectedMotherboard === 'asus_x670e_gene'));
+    
+    const maxFreq = isAdieHighFreqCombo ? 10000 : 8000;
+    
+    if (freq > maxFreq) {
+      stability = 0;
+    } else {
+      // Calculate required voltage based on frequency
+      const requiredVoltage = 1.1 + (freq - 4800) / 8000;
+      
+      if (voltage < requiredVoltage) {
+        stability = Math.max(0, 100 - (requiredVoltage - voltage) * 200);
+      } else if (freq > 7000) {
+        stability = Math.max(0, 100 - (freq - 7000) / 30);
+      }
+      
+      // CPU-specific adjustments
+      if (selectedCpu.includes('x3d')) {
+        stability = Math.max(0, stability - 10); // X3D CPUs are slightly harder to OC
+      } else if (selectedCpu.includes('14')) {
+        stability = Math.min(100, stability + 5); // 14th gen Intel has improved IMC
+      } else if (selectedCpu.includes('12')) {
+        stability = Math.min(100, stability - 5); // 12th gen Intel has worse IMC
+      }
+	  
+	  // IC-specific adjustments
+	  if (selectedRamIc.includes('hynix')) {
+		stability = Math.min(100, stability + 15); // ddr5 hynix is the best IC
+	  }
+		
+      // Motherboard-specific adjustments
+      if (selectedMotherboard.includes('godlike') || selectedMotherboard.includes('xtreme')) {
+        stability = Math.min(100, stability + 3); // High-end boards have better power delivery
+      }
+    }
+    
+    stabilityBar.style.width = `${stability}%`;
+    stabilityBar.style.backgroundColor = stability > 50 ? '#4CAF50' : '#ff9800';
+    
+    if (stability === 100) {
+      stabilityStatus.textContent = 'System Stability: Stable';
+      stabilityStatus.style.color = '#4CAF50';
+    } else if (stability > 50) {
+      stabilityStatus.textContent = 'System Stability: Marginal';
+      stabilityStatus.style.color = '#ff9800';
+    } else {
+      stabilityStatus.textContent = 'System Stability: Unstable';
+      stabilityStatus.style.color = '#f44336';
+    }
+  }
+
+  function updateFrequencyLimit() {
+    const selectedMotherboard = motherboardSelect.value;
+    const selectedRamIc = ramIcSelect.value;
+    const isAdieHighFreqCombo = (selectedRamIc === 'hynix_a' && 
+      (selectedMotherboard === 'evga_z790_dark' || selectedMotherboard === 'asus_z790_apex'));
+    
+    frequencySlider.max = isAdieHighFreqCombo ? "10000" : "8000";
+    if (!isAdieHighFreqCombo && parseInt(frequencySlider.value) > 8000) {
+      frequencySlider.value = "8000";
+    }
+    updateSystem();
+  }
+
+  frequencySlider.addEventListener('input', updateSystem);
+  voltageSlider.addEventListener('input', updateSystem);
+  motherboardSelect.addEventListener('change', updateFrequencyLimit);
+  ramIcSelect.addEventListener('change', updateFrequencyLimit);
+  cpuSelect.addEventListener('change', updateMotherboardOptions);
+
+  updateMotherboardOptions();
+  updateFrequencyLimit();
+  updateSystem();
+  populateTimingDropdowns();
+</script>
+</body></html>
