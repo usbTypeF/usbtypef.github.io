@@ -1,0 +1,256 @@
+<html><head><base href=""/>
+<title>FPS Comparison: 60fps Locked vs Unlimited with Random Stutters (Dark Theme)</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  color: #e0e0e0;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+.container {
+  background-color: #1e1e1e;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(255,255,255,0.1);
+  padding: 20px;
+  max-width: 800px;
+  width: 100%;
+}
+h1 {
+  color: #ffffff;
+  text-align: center;
+}
+.demo-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+.demo {
+  width: 48%;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 10px;
+}
+h2 {
+  color: #bb86fc;
+  margin-top: 0;
+}
+canvas {
+  width: 100%;
+  height: 200px;
+  border: 1px solid #333;
+  background-color: #2c2c2c;
+}
+p {
+  margin: 10px 0;
+  color: #b0b0b0;
+}
+.smooth {
+  color: #03dac6;
+}
+.choppy {
+  color: #cf6679;
+}
+a {
+  color: #bb86fc;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>FPS Comparison: Locked 60 FPS vs Unlimited with Random Stutters</h1>
+  
+  <div class="demo-container">
+    <div class="demo">
+      <h2>Locked 60 FPS</h2>
+      <canvas id="canvas1" width="400" height="200"></canvas>
+      <canvas id="graph1" width="400" height="100"></canvas>
+      <p>FPS: <span class="smooth">Locked at 60</span></p>
+      <p>Experience: <span class="smooth">Smooth and consistent</span></p>
+    </div>
+    
+    <div class="demo">
+      <h2>Unlimited FPS with Stutters</h2>
+      <canvas id="canvas2" width="400" height="200"></canvas>
+      <canvas id="graph2" width="400" height="100"></canvas>
+      <p>FPS: <span class="choppy">Unlimited with stutters</span></p>
+      <p>Experience: <span class="choppy">Variable FPS with unpredictable stutters</span></p>
+    </div>
+  </div>
+
+  <p>This demonstration illustrates the difference between a consistent frame rate and an inconsistent one with random stutters. Both scenarios move the line at exactly 60 pixels per second, regardless of the frame rate. Scenario 1 shows a locked 60 FPS, which provides a smooth and consistent experience. Scenario 2 runs at an unlimited frame rate but experiences stutters.</p>
+
+  <p>The graphs below each animation show the frame times for the last 10 seconds. A consistent line indicates smooth performance, while spikes indicate stutters or inconsistencies.</p>
+
+  <p>Remember: Consistency is often more important than raw numbers when it comes to perceived smoothness in graphics rendering.</p>
+</div>
+
+<script>
+function animateLocked60FPS(canvas, graphCanvas) {
+  const ctx = canvas.getContext('2d');
+  const graphCtx = graphCanvas.getContext('2d');
+  let lastTime = performance.now();
+  const frameTime = 1000 / 60; // 60 FPS
+  let position = 0;
+  let frameTimes = [];
+  let frameTimeStamps = [];
+
+  function loop(currentTime) {
+    const deltaTime = currentTime - lastTime;
+
+    if (deltaTime >= frameTime) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Move the line (60 pixels per second)
+      position = (position + 60 * deltaTime / 1000) % canvas.width;
+      
+      // Draw the line
+      ctx.beginPath();
+      ctx.moveTo(position, 0);
+      ctx.lineTo(position, canvas.height);
+      ctx.strokeStyle = '#03dac6';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '12px Arial';
+      ctx.fillText(`FPS: 60`, 10, 20);
+
+      // Update frame time data
+      frameTimes.push(deltaTime);
+      frameTimeStamps.push(currentTime);
+
+      // Keep only last 10 seconds of data
+      while (frameTimeStamps[0] < currentTime - 10000) {
+        frameTimes.shift();
+        frameTimeStamps.shift();
+      }
+
+      drawGraph(graphCtx, frameTimes);
+
+      lastTime = currentTime;
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
+}
+
+function animateUnlimitedWithRandomStutters(canvas, graphCanvas) {
+  const ctx = canvas.getContext('2d');
+  const graphCtx = graphCanvas.getContext('2d');
+  let lastTime = performance.now();
+  let lastStutterTime = performance.now();
+  let frameTimes = [];
+  let frameTimeStamps = [];
+  let isStuttering = false;
+  let position = 0;
+  let stutterInterval = getRandomStutterInterval();
+
+  function loop(currentTime) {
+    const deltaTime = currentTime - lastTime;
+    lastTime = currentTime;
+
+    if (currentTime - lastStutterTime > stutterInterval && !isStuttering) {
+      isStuttering = true;
+      const stutterDuration = getRandomStutterDuration();
+      setTimeout(() => {
+        isStuttering = false;
+        lastStutterTime = performance.now();
+        stutterInterval = getRandomStutterInterval();
+      }, stutterDuration);
+    }
+
+    if (!isStuttering) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Move the line (60 pixels per second)
+      position = (position + 60 * deltaTime / 1000) % canvas.width;
+      
+      // Draw the line
+      ctx.beginPath();
+      ctx.moveTo(position, 0);
+      ctx.lineTo(position, canvas.height);
+      ctx.strokeStyle = '#cf6679';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Update frame time data
+      frameTimes.push(deltaTime);
+      frameTimeStamps.push(currentTime);
+
+      // Keep only last 10 seconds of data
+      while (frameTimeStamps[0] < currentTime - 10000) {
+        frameTimes.shift();
+        frameTimeStamps.shift();
+      }
+
+      const avgFPS = 1000 / (frameTimes.reduce((a, b) => a + b) / frameTimes.length);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '12px Arial';
+      ctx.fillText(`FPS: ${avgFPS.toFixed(0)}`, 10, 20);
+
+      drawGraph(graphCtx, frameTimes);
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
+}
+
+function getRandomStutterInterval() {
+  // Random interval between 200ms (5 times per second) and 1000ms (1 time per second)
+  return Math.random() * 800 + 200;
+}
+
+function getRandomStutterDuration() {
+  // Random duration between 16ms and 96ms
+  return Math.random() * 80 + 16;
+}
+
+function drawGraph(ctx, frameTimes) {
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.strokeStyle = '#bb86fc';
+  ctx.beginPath();
+  const maxTime = Math.max(...frameTimes, 33.33); // At least 30 FPS for scale
+  frameTimes.forEach((time, index) => {
+    const x = index / (frameTimes.length - 1) * ctx.canvas.width;
+    const y = ctx.canvas.height - (time / maxTime) * ctx.canvas.height;
+    if (index === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  });
+  ctx.stroke();
+
+  // Draw horizontal lines for 30, 60, and 120 FPS
+  const fpsLines = [30, 60, 120];
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.font = '10px Arial';
+  fpsLines.forEach(fps => {
+    const y = ctx.canvas.height - (1000 / fps / maxTime) * ctx.canvas.height;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(ctx.canvas.width, y);
+    ctx.stroke();
+    ctx.fillText(`${fps} FPS`, 5, y - 5);
+  });
+}
+
+const canvas1 = document.getElementById('canvas1');
+const canvas2 = document.getElementById('canvas2');
+const graph1 = document.getElementById('graph1');
+const graph2 = document.getElementById('graph2');
+
+animateLocked60FPS(canvas1, graph1);
+animateUnlimitedWithRandomStutters(canvas2, graph2);
+</script>
+</body></html>
