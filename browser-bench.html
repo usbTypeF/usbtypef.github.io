@@ -1,0 +1,323 @@
+<html><head><base href="">
+<title>Browser Bench</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+canvas {
+  border: 1px solid #555;
+  background-color: #2a2a2a;
+}
+#stats, #timer {
+  margin-top: 20px;
+  font-size: 18px;
+  background-color: #2a2a2a;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+h1 {
+  color: #4a9fff;
+}
+#resultImage {
+  margin-top: 20px;
+  max-width: 100%;
+}
+#downloadBtn, #submitUsername, #refreshBtn {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #4a9fff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+#downloadBtn:hover, #submitUsername:hover, #refreshBtn:hover {
+  background-color: #1234ee;
+}
+#testContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#usernameInput {
+  margin-top: 20px;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #4a9fff;
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+}
+</style>
+</head>
+<body>
+<div id="testContent">
+  <h1>Frametime Stability Test</h1>
+  <div id="timer">Time Remaining: 65s</div>
+  <br>
+  <canvas id="ballCanvas" width="800" height="400"></canvas>
+  <canvas id="graphCanvas" width="800" height="200"></canvas>
+  <div id="stats"></div>
+</div>
+<input type="text" id="usernameInput" placeholder="Enter your username" style="display:none;">
+<button id="submitUsername" style="display:none;">Submit</button>
+<img id="resultImage" style="display:none;">
+<br>
+<button id="downloadBtn" style="display:none;">Download Results</button>
+<button id="refreshBtn" onClick="window.location.reload();" style="display:none;">Retest</button>
+
+<script>
+const ballCanvas = document.getElementById('ballCanvas');
+const graphCanvas = document.getElementById('graphCanvas');
+const ballCtx = ballCanvas.getContext('2d');
+const graphCtx = graphCanvas.getContext('2d');
+const stats = document.getElementById('stats');
+const timer = document.getElementById('timer');
+const resultImage = document.getElementById('resultImage');
+const downloadBtn = document.getElementById('downloadBtn');
+const testContent = document.getElementById('testContent');
+const usernameInput = document.getElementById('usernameInput');
+const submitUsername = document.getElementById('submitUsername');
+
+let ball = {
+  x: 400,
+  y: 200,
+  radius: 20,
+  dx: 5,
+  dy: 2
+};
+
+let frametimes = [];
+let lastTimestamp = 0;
+let startTime = 0;
+const MAX_DISPLAY_FRAMES = 2500;
+const TEST_DURATION = 65000; // 65 seconds in milliseconds
+const WARMUP_DURATION = 5000; // 5 second warmup
+
+function drawBall() {
+  ballCtx.clearRect(0, 0, ballCanvas.width, ballCanvas.height);
+  ballCtx.beginPath();
+  ballCtx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+  ballCtx.fillStyle = '#4a9fff';
+  ballCtx.fill();
+  ballCtx.closePath();
+}
+
+function moveBall() {
+  ball.x += ball.dx;
+  ball.y += ball.dy;
+  
+  if (ball.x + ball.radius > ballCanvas.width || ball.x - ball.radius < 0) {
+    ball.dx = -ball.dx;
+  }
+  if (ball.y + ball.radius > ballCanvas.height || ball.y - ball.radius < 0) {
+    ball.dy = -ball.dy;
+  }
+}
+
+function drawGraph(canvas, ctx, frameTimes, showTicks = false, isResultScreen = false) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Draw background
+  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  gradient.addColorStop(0, '#2a2a2a');
+  gradient.addColorStop(1, '#1e1e1e');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const graphStartX = isResultScreen ? 25 : 0;
+  const graphStartY = isResultScreen ? canvas.height - 25 : canvas.height;
+  const graphWidth = isResultScreen ? canvas.width - graphStartX : canvas.width;
+  const graphHeight = isResultScreen ? canvas.height - 25 : canvas.height;
+
+  const avgFrametime = frameTimes.reduce((sum, time) => sum + time, 0) / frameTimes.length;
+
+  if (showTicks) {
+    // Draw time ticks (horizontal)
+    ctx.strokeStyle = '#555';
+    ctx.fillStyle = '#888';
+    ctx.font = '12px Arial';
+    for (let i = 0; i <= 12; i++) {
+      const x = graphStartX + (i / 12) * graphWidth;
+      ctx.beginPath();
+      ctx.moveTo(x, graphStartY);
+      ctx.lineTo(x, graphStartY + 10);
+      ctx.stroke();
+      ctx.fillText(`${i * 5}s`, x - 10, graphStartY + 25);
+    }
+
+    // Draw frametime ticks (vertical)
+    const maxFrametime = Math.max(...frameTimes);
+    const roundedMax = Math.ceil(maxFrametime / 2) * 2;
+    for (let i = 0; i <= roundedMax; i += 2) {
+      const y = graphStartY - (i / roundedMax) * graphHeight;
+      ctx.beginPath();
+      ctx.moveTo(graphStartX, y);
+      ctx.lineTo(graphStartX - 10, y);
+      ctx.stroke();
+      ctx.fillText(`${i}ms`, 0, y + 5);
+    }
+  }
+
+  // Draw frametime graph
+  ctx.beginPath();
+  ctx.moveTo(graphStartX, graphStartY);
+  
+  const maxFrametime = Math.max(...frameTimes);
+  const scale = graphHeight / maxFrametime;
+  
+  frameTimes.forEach((time, index) => {
+    const x = graphStartX + (index / frameTimes.length) * graphWidth;
+    const y = graphStartY - (time * scale);
+    ctx.lineTo(x, y);
+  });
+  
+  ctx.strokeStyle = '#ff6600';
+  ctx.stroke();
+
+  // Draw average frametime tick (blue)
+  const avgY = graphStartY - (avgFrametime / maxFrametime) * graphHeight;
+  ctx.beginPath();
+  ctx.moveTo(graphStartX, avgY);
+  ctx.lineTo(canvas.width, avgY);
+  ctx.strokeStyle = '#4a9fff';
+  ctx.setLineDash([5, 5]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#4a9fff';
+  ctx.fillText(`Avg: ${avgFrametime.toFixed(2)}ms`, graphStartX + 5, avgY - 5);
+}
+
+function calculateStandardDeviation(values) {
+  const avg = values.reduce((sum, value) => sum + value, 0) / values.length;
+  const squareDiffs = values.map(value => {
+    const diff = value - avg;
+    return diff * diff;
+  });
+  const avgSquareDiff = squareDiffs.reduce((sum, value) => sum + value, 0) / squareDiffs.length;
+  return Math.sqrt(avgSquareDiff);
+}
+
+function updateStats(displayFrametimes) {
+  const sortedFrametimes = [...displayFrametimes].sort((a, b) => b - a);
+  const avg = displayFrametimes.reduce((sum, time) => sum + time, 0) / displayFrametimes.length;
+  
+  const onePercentCount = Math.max(1, Math.ceil(displayFrametimes.length * 0.01));
+  const pointOnePercentCount = Math.max(1, Math.ceil(displayFrametimes.length * 0.001));
+  
+  const onePercent = sortedFrametimes.slice(0, onePercentCount).reduce((sum, time) => sum + time, 0) / onePercentCount;
+  const pointOnePercent = sortedFrametimes.slice(0, pointOnePercentCount).reduce((sum, time) => sum + time, 0) / pointOnePercentCount;
+  const maximum = sortedFrametimes[0];
+  const stdev = calculateStandardDeviation(displayFrametimes);
+  
+  return `
+    Total Frames: ${displayFrametimes.length}<br>
+    Average: ${avg.toFixed(2)} ms<br>
+    Standard Deviation: ${stdev.toFixed(2)} ms<br>
+    1% (avg of longest 1%): ${onePercent.toFixed(2)} ms<br>
+    0.1% (avg of longest 0.1%): ${pointOnePercent.toFixed(2)} ms<br>
+    Maximum (longest frame): ${maximum.toFixed(2)} ms
+  `;
+}
+
+function gameLoop(timestamp) {
+  if (!startTime) startTime = timestamp;
+  const elapsedTime = timestamp - startTime;
+  
+  if (elapsedTime <= TEST_DURATION) {
+    const frametime = timestamp - lastTimestamp;
+    frametimes.push(frametime);
+    
+    const displayFrametimes = frametimes.slice(-MAX_DISPLAY_FRAMES);
+    drawGraph(graphCanvas, graphCtx, displayFrametimes);
+    stats.innerHTML = updateStats(displayFrametimes);
+    
+    const remainingTime = Math.ceil((TEST_DURATION - elapsedTime) / 1000);
+    timer.textContent = `Time Remaining: ${remainingTime}s`;
+    
+    lastTimestamp = timestamp;
+    
+    moveBall();
+    drawBall();
+    requestAnimationFrame(gameLoop);
+  } else {
+    endTest();
+  }
+}
+
+function endTest() {
+  // Remove test content
+  testContent.style.display = 'none';
+
+  // Show username input
+  usernameInput.style.display = 'block';
+  submitUsername.style.display = 'block';
+
+  submitUsername.onclick = () => {
+    const username = usernameInput.value || 'Anonymous';
+    generateFinalImage(username);
+  };
+}
+
+function generateFinalImage(username) {
+  // Hide username input
+  usernameInput.style.display = 'none';
+  submitUsername.style.display = 'none';
+
+  // Generate final stats image
+  const finalStatsCanvas = document.createElement('canvas');
+  finalStatsCanvas.width = 800;
+  finalStatsCanvas.height = 600;
+  const ctx = finalStatsCanvas.getContext('2d');
+  
+  // Remove the warmup data
+  const analyzedFrametimes = frametimes.slice(Math.ceil(WARMUP_DURATION / (TEST_DURATION / frametimes.length)));
+  
+  // Draw graph with analyzed data and ticks
+  drawGraph(finalStatsCanvas, ctx, analyzedFrametimes, true, true);
+  
+  // Write stats
+  ctx.font = '14px Arial';
+  ctx.fillStyle = '#e0e0e0';
+  const finalStats = updateStats(analyzedFrametimes);
+  const statsLines = finalStats.split('<br>');
+  statsLines.forEach((line, index) => {
+    ctx.fillText(line, 10, 220 + index * 20);
+  });
+  
+  // Add username and test details
+  ctx.font = 'bold 18px Arial';
+  ctx.fillStyle = '#4a9fff';
+  ctx.fillText(`User: ${username}`, 10, 30);
+  ctx.font = '14px Arial';
+  ctx.fillStyle = '#888888';
+  ctx.fillText('60-second test (5-second warmup excluded)', 10, 50);
+
+  // Display the image
+  resultImage.src = finalStatsCanvas.toDataURL();
+  resultImage.style.display = 'block';
+  downloadBtn.style.display = 'block';
+  refreshBtn.style.display = 'block';
+  
+  // Set up download button
+  downloadBtn.onclick = () => {
+    const link = document.createElement('a');
+    link.download = `frametime-analysis-${username}.png`;
+    link.href = resultImage.src;
+    link.click();
+  };
+}
+
+requestAnimationFrame(gameLoop);
+</script>
+
+</body></html>
