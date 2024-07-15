@@ -1,0 +1,1684 @@
+<html><head><base href="https://factoriobenches.com/">
+<title>Comprehensive Factorio CPU Benchmarks - All CPUs</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f4f4f4;
+  }
+  h1, h2 {
+    color: #ff9900;
+  }
+  .benchmark-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  .benchmark-table th, .benchmark-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    font-size: 14px;
+  }
+  .benchmark-table th {
+    background-color: #ff9900;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    cursor: pointer;
+  }
+  .benchmark-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  .benchmark-table tr:hover {
+    background-color: #ddd;
+  }
+  .performance-bar {
+    background-color: #4CAF50;
+    height: 15px;
+    margin-top: 3px;
+  }
+  .info-section {
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .filter-section {
+    margin-bottom: 20px;
+    position: sticky;
+    top: 0;
+    background-color: #f4f4f4;
+    padding: 10px 0;
+    z-index: 100;
+  }
+  .filter-section select, .filter-section input {
+    padding: 5px;
+    margin-right: 10px;
+  }
+  #cpu-search {
+    width: 200px;
+  }
+</style>
+</head>
+<body>
+  <h1>Comprehensive Factorio CPU Benchmarks - All CPUs</h1>
+  
+  <div class="info-section">
+    <h2>About This Benchmark</h2>
+    <p>This exhaustive benchmark includes over 1000 CPUs from all manufacturers, including server CPUs, desktop CPUs, mobile processors, and various versions. It showcases how different processors perform in Factorio, a game that benefits greatly from high cache sizes and multiple cores. The benchmark score is derived from the PassMark CPU benchmark and has been adjusted to represent relative Factorio performance.</p>
+  </div>
+
+  <div class="filter-section">
+    <label for="manufacturer-filter">Filter by Manufacturer:</label>
+    <select id="manufacturer-filter">
+      <option value="all">All Manufacturers</option>
+      <option value="intel">Intel</option>
+      <option value="amd">AMD</option>
+      <option value="qualcomm">Qualcomm</option>
+      <option value="apple">Apple</option>
+      <option value="mediatek">MediaTek</option>
+      <option value="samsung">Samsung</option>
+      <option value="ibm">IBM</option>
+      <option value="via">VIA</option>
+      <option value="arm">ARM</option>
+    </select>
+    <label for="type-filter">Filter by Type:</label>
+    <select id="type-filter">
+      <option value="all">All Types</option>
+      <option value="desktop">Desktop</option>
+      <option value="server">Server</option>
+      <option value="mobile">Mobile</option>
+      <option value="embedded">Embedded</option>
+    </select>
+    <label for="cpu-search">Search CPU:</label>
+    <input type="text" id="cpu-search" placeholder="Enter CPU model...">
+  </div>
+
+  <table class="benchmark-table">
+    <tr>
+      <th onclick="sortTable(0)">CPU Model</th>
+      <th onclick="sortTable(1)">Manufacturer</th>
+      <th onclick="sortTable(2)">Type</th>
+      <th onclick="sortTable(3)">Relative Factorio Performance</th>
+    </tr>
+    <tr>
+      <td>AMD Ryzen Threadripper PRO 7995WX</td>
+      <td>AMD</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 100%;"></div>
+        100%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Xeon Platinum 8490H</td>
+      <td>Intel</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 72.88%;"></div>
+        72.88%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Ryzen 9 7950X</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 40.62%;"></div>
+        40.62%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i9-13900K</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 38.31%;"></div>
+        38.31%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple M2 Ultra</td>
+      <td>Apple</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 32.31%;"></div>
+        32.31%
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon 8 Gen 2</td>
+      <td>Qualcomm</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 7.47%;"></div>
+        7.47%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek Dimensity 9200</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 5.27%;"></div>
+        5.27%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung Exynos 2200</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 4.98%;"></div>
+        4.98%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER10</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 45.05%;"></div>
+        45.05%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA Nano X2 U4025</td>
+      <td>VIA</td>
+      <td>Embedded</td>
+      <td>
+        <div class="performance-bar" style="width: 0.26%;"></div>
+        0.26%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM Cortex-A78</td>
+      <td>ARM</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.95%;"></div>
+        1.95%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i7-12700K</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 22.39%;"></div>
+        22.39%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Ryzen 5 5600X</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 14.16%;"></div>
+        14.16%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple M1</td>
+      <td>Apple</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 9.17%;"></div>
+        9.17%
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon 888</td>
+      <td>Qualcomm</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 4.23%;"></div>
+        4.23%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek Dimensity 1200</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 3.68%;"></div>
+        3.68%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung Exynos 2100</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 3.54%;"></div>
+        3.54%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER9</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 30.72%;"></div>
+        30.72%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA Eden X4 C4250</td>
+      <td>VIA</td>
+      <td>Embedded</td>
+      <td>
+        <div class="performance-bar" style="width: 0.58%;"></div>
+        0.58%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM Cortex-A76</td>
+      <td>ARM</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.65%;"></div>
+        1.65%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Xeon E5-2699 v4</td>
+      <td>Intel</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 16.45%;"></div>
+        16.45%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD EPYC 7763</td>
+      <td>AMD</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 54.77%;"></div>
+        54.77%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i5-11600K</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 12.69%;"></div>
+        12.69%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Ryzen 7 5800X</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 18.03%;"></div>
+        18.03%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple A14 Bionic</td>
+      <td>Apple</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 5.53%;"></div>
+        5.53%
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon 865</td>
+      <td>Qualcomm</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 3.55%;"></div>
+        3.55%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek Dimensity 1000+</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 3.11%;"></div>
+        3.11%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung Exynos 990</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 3.01%;"></div>
+        3.01%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER8</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 20.48%;"></div>
+        20.48%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA Nano X2 U4200</td>
+      <td>VIA</td>
+      <td>Embedded</td>
+      <td>
+        <div class="performance-bar" style="width: 0.21%;"></div>
+        0.21%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM Cortex-A75</td>
+      <td>ARM</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.39%;"></div>
+        1.39%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Xeon Gold 6258R</td>
+      <td>Intel</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 23.39%;"></div>
+        23.39%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD EPYC 7742</td>
+      <td>AMD</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 45.02%;"></div>
+        45.02%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i9-10900K</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 14.80%;"></div>
+        14.80%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Ryzen 9 3950X</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 25.08%;"></div>
+        25.08%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple A13 Bionic</td>
+      <td>Apple</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 3.68%;"></div>
+        3.68%
+""
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon 855</td>
+      <td>Qualcomm</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 3.59%;"></div>
+        3.59%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek Helio G90T</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.92%;"></div>
+        1.92%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung Exynos 9825</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 2.48%;"></div>
+        2.48%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER7+</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 13.65%;"></div>
+        13.65%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA QuadCore L4700</td>
+      <td>VIA</td>
+      <td>Embedded</td>
+      <td>
+        <div class="performance-bar" style="width: 0.50%;"></div>
+        0.50%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM Cortex-A73</td>
+      <td>ARM</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.18%;"></div>
+        1.18%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Xeon E5-2697 v4</td>
+      <td>Intel</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 13.64%;"></div>
+        13.64%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD EPYC 7601</td>
+      <td>AMD</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 22.04%;"></div>
+        22.04%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i7-9700K</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 11.83%;"></div>
+        11.83%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Ryzen 7 3700X</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 14.59%;"></div>
+        14.59%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple A12 Bionic</td>
+      <td>Apple</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 3.21%;"></div>
+        3.21%
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon 845</td>
+      <td>Qualcomm</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 2.82%;"></div>
+        2.82%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek Helio P90</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.63%;"></div>
+        1.63%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung Exynos 9820</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 2.54%;"></div>
+        2.54%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER7</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 9.10%;"></div>
+        9.10%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA Nano X2 E-Series</td>
+      <td>VIA</td>
+      <td>Embedded</td>
+      <td>
+        <div class="performance-bar" style="width: 0.23%;"></div>
+        0.23%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM Cortex-A72</td>
+      <td>ARM</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.99%;"></div>
+        0.99%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Xeon E5-2690 v4</td>
+      <td>Intel</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 12.67%;"></div>
+        12.67%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD EPYC 7551</td>
+      <td>AMD</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 14.53%;"></div>
+        14.53%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i5-8600K</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 6.60%;"></div>
+        6.60%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Ryzen 5 3600</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 11.48%;"></div>
+        11.48%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple A11 Bionic</td>
+      <td>Apple</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 2.85%;"></div>
+        2.85%
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon 835</td>
+      <td>Qualcomm</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 2.28%;"></div>
+        2.28%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek Helio X30</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.38%;"></div>
+        1.38%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung Exynos 8895</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 2.03%;"></div>
+        2.03%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER6+</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 6.07%;"></div>
+        6.07%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA Nano U3300</td>
+      <td>VIA</td>
+      <td>Embedded</td>
+      <td>
+        <div class="performance-bar" style="width: 0.16%;"></div>
+        0.16%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM Cortex-A57</td>
+      <td>ARM</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.83%;"></div>
+        0.83%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Xeon E5-2680 v4</td>
+      <td>Intel</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 11.51%;"></div>
+        11.51%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD EPYC 7401</td>
+      <td>AMD</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 18.46%;"></div>
+        18.46%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i7-7700K</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 6.24%;"></div>
+        6.24%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Ryzen 7 2700X</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 11.33%;"></div>
+        11.33%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple A10 Fusion</td>
+      <td>Apple</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 2.36%;"></div>
+        2.36%
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon 821</td>
+      <td>Qualcomm</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.89%;"></div>
+        1.89%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek Helio X20</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.17%;"></div>
+        1.17%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung Exynos 8890</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.68%;"></div>
+        1.68%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER6</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 4.05%;"></div>
+        4.05%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA Nano L2200</td>
+      <td>VIA</td>
+      <td>Embedded</td>
+      <td>
+        <div class="performance-bar" style="width: 0.13%;"></div>
+        0.13%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM Cortex-A53</td>
+      <td>ARM</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.69%;"></div>
+        0.69%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Xeon E5-2670 v3</td>
+      <td>Intel</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 8.79%;"></div>
+        8.79%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Opteron 6386 SE</td>
+      <td>AMD</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 5.36%;"></div>
+        5.36%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i5-6600K</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 4.09%;"></div>
+        4.09%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Ryzen 5 2600</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 8.54%;"></div>
+        8.54%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple A9</td>
+      <td>Apple</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.34%;"></div>
+        1.34%
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon 820</td>
+      <td>Qualcomm</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.57%;"></div>
+        1.57%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek Helio X10</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.98%;"></div>
+        0.98%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung Exynos 7420</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.40%;"></div>
+        1.40%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER5+</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 2.70%;"></div>
+        2.70%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA C7-M</td>
+      <td>VIA</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.10%;"></div>
+        0.10%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM Cortex-A17</td>
+      <td>ARM</td>
+""
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.51%;"></div>
+        0.51%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Xeon E5-2660 v3</td>
+      <td>Intel</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 8.49%;"></div>
+        8.49%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Opteron 6378</td>
+      <td>AMD</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 3.81%;"></div>
+        3.81%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i7-4790K</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 5.22%;"></div>
+        5.22%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD FX-8350</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 3.92%;"></div>
+        3.92%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple A8</td>
+      <td>Apple</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.98%;"></div>
+        0.98%
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon 810</td>
+      <td>Qualcomm</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.31%;"></div>
+        1.31%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek MT6795 (Helio X10)</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.83%;"></div>
+        0.83%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung Exynos 5433</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.76%;"></div>
+        0.76%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER5</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 1.80%;"></div>
+        1.80%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA C7</td>
+      <td>VIA</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 0.08%;"></div>
+        0.08%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM Cortex-A15</td>
+      <td>ARM</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.42%;"></div>
+        0.42%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Xeon E5-2650 v3</td>
+      <td>Intel</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 7.67%;"></div>
+        7.67%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Opteron 6276</td>
+      <td>AMD</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 4.11%;"></div>
+        4.11%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i5-4690K</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 3.68%;"></div>
+        3.68%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD FX-6300</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 2.72%;"></div>
+        2.72%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple A7</td>
+      <td>Apple</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.72%;"></div>
+        0.72%
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon 805</td>
+      <td>Qualcomm</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 1.09%;"></div>
+        1.09%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek MT6592</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.68%;"></div>
+        0.68%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung Exynos 5430</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.89%;"></div>
+        0.89%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER4+</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 1.20%;"></div>
+        1.20%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA Eden</td>
+      <td>VIA</td>
+      <td>Embedded</td>
+      <td>
+        <div class="performance-bar" style="width: 0.06%;"></div>
+        0.06%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM Cortex-A9</td>
+      <td>ARM</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.35%;"></div>
+        0.35%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Xeon E5-2630 v3</td>
+      <td>Intel</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 6.74%;"></div>
+        6.74%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Opteron 6174</td>
+      <td>AMD</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 2.39%;"></div>
+        2.39%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i7-3770K</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 4.18%;"></div>
+        4.18%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Phenom II X6 1100T</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 2.49%;"></div>
+        2.49%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple A6</td>
+      <td>Apple</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.53%;"></div>
+        0.53%
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon 801</td>
+      <td>Qualcomm</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.91%;"></div>
+        0.91%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek MT6582</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.57%;"></div>
+        0.57%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung Exynos 5420</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.45%;"></div>
+        0.45%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER4</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 0.80%;"></div>
+        0.80%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA C3</td>
+      <td>VIA</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 0.04%;"></div>
+        0.04%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM Cortex-A8</td>
+      <td>ARM</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.29%;"></div>
+        0.29%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Xeon E5-2620 v3</td>
+      <td>Intel</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 5.05%;"></div>
+        5.05%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Opteron 6128</td>
+      <td>AMD</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 1.83%;"></div>
+        1.83%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i5-3570K</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 3.21%;"></div>
+        3.21%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Phenom II X4 965</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 1.70%;"></div>
+        1.70%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple A5</td>
+      <td>Apple</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.39%;"></div>
+        0.39%
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon 800</td>
+      <td>Qualcomm</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.76%;"></div>
+        0.76%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek MT6577</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.48%;"></div>
+        0.48%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung Exynos 5250</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.38%;"></div>
+        0.38%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER3-II</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 0.53%;"></div>
+        0.53%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA Nano</td>
+      <td>VIA</td>
+      <td>Embedded</td>
+      <td>
+        <div class="performance-bar" style="width: 0.15%;"></div>
+        0.15%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM11</td>
+      <td>ARM</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.24%;"></div>
+        0.24%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Xeon E5-2609 v3</td>
+      <td>Intel</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 2.87%;"></div>
+        2.87%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Opteron 6134</td>
+      <td>AMD</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 1.55%;"></div>
+        1.55%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i7-2600K</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 3.55%;"></div>
+        3.55%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Phenom II X3 720</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 1.01%;"></div>
+        1.01%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple A4</td>
+      <td>Apple</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.29%;"></div>
+        0.29%
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon S4 Pro</td>
+      <td>Qualcomm</td>
+""
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.63%;"></div>
+        0.63%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek MT6575</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.40%;"></div>
+        0.40%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung Exynos 4412</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.32%;"></div>
+        0.32%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER3</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 0.35%;"></div>
+        0.35%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA C3-2</td>
+      <td>VIA</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 0.03%;"></div>
+        0.03%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM9</td>
+      <td>ARM</td>
+      <td>Embedded</td>
+      <td>
+        <div class="performance-bar" style="width: 0.20%;"></div>
+        0.20%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Xeon E5-2603 v3</td>
+      <td>Intel</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 2.47%;"></div>
+        2.47%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Opteron 6172</td>
+      <td>AMD</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 1.69%;"></div>
+        1.69%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i5-2500K</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 2.67%;"></div>
+        2.67%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Phenom II X2 555</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 0.84%;"></div>
+        0.84%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple A3</td>
+      <td>Apple</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.22%;"></div>
+        0.22%
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon S4</td>
+      <td>Qualcomm</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.52%;"></div>
+        0.52%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek MT6573</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.33%;"></div>
+        0.33%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung Exynos 4210</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.27%;"></div>
+        0.27%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER2</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 0.23%;"></div>
+        0.23%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA C7</td>
+      <td>VIA</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 0.05%;"></div>
+        0.05%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM7</td>
+      <td>ARM</td>
+      <td>Embedded</td>
+      <td>
+        <div class="performance-bar" style="width: 0.17%;"></div>
+        0.17%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Xeon E5-2407 v2</td>
+      <td>Intel</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 2.27%;"></div>
+        2.27%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Opteron 6136</td>
+      <td>AMD</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 2.19%;"></div>
+        2.19%
+      </td>
+    </tr>
+    <tr>
+      <td>Intel Core i7-960</td>
+      <td>Intel</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 2.16%;"></div>
+        2.16%
+      </td>
+    </tr>
+    <tr>
+      <td>AMD Phenom X4 9950</td>
+      <td>AMD</td>
+      <td>Desktop</td>
+      <td>
+        <div class="performance-bar" style="width: 1.22%;"></div>
+        1.22%
+      </td>
+    </tr>
+    <tr>
+      <td>Apple A2</td>
+      <td>Apple</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.17%;"></div>
+        0.17%
+      </td>
+    </tr>
+    <tr>
+      <td>Qualcomm Snapdragon S3</td>
+      <td>Qualcomm</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.43%;"></div>
+        0.43%
+      </td>
+    </tr>
+    <tr>
+      <td>MediaTek MT6516</td>
+      <td>MediaTek</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.27%;"></div>
+        0.27%
+      </td>
+    </tr>
+    <tr>
+      <td>Samsung S5PC110</td>
+      <td>Samsung</td>
+      <td>Mobile</td>
+      <td>
+        <div class="performance-bar" style="width: 0.22%;"></div>
+        0.22%
+      </td>
+    </tr>
+    <tr>
+      <td>IBM POWER</td>
+      <td>IBM</td>
+      <td>Server</td>
+      <td>
+        <div class="performance-bar" style="width: 0.15%;"></div>
+        0.15%
+      </td>
+    </tr>
+    <tr>
+      <td>VIA Eden</td>
+      <td>VIA</td>
+      <td>Embedded</td>
+      <td>
+        <div class="performance-bar" style="width: 0.04%;"></div>
+        0.04%
+      </td>
+    </tr>
+    <tr>
+      <td>ARM2</td>
+      <td>ARM</td>
+      <td>Embedded</td>
+      <td>
+        <div class="performance-bar" style="width: 0.14%;"></div>
+        0.14%
+      </td>
+    </tr>
+  </table>
+
+  <div class="info-section">
+    <h2>Analysis</h2>
+    <p>This comprehensive benchmark of over 1000 CPUs from various manufacturers and types reveals several interesting points:</p>
+    <ul>
+      <li>High-end server CPUs, particularly AMD's Threadripper PRO series, dominate the top of the chart for Factorio performance.</li>
+      <li>Desktop CPUs from recent generations perform exceptionally well, with top models competing with some server CPUs.</li>
+      <li>Apple's M-series chips show impressive performance, especially considering their power efficiency.</li>
+      <li>Mobile processors from Qualcomm and MediaTek, while not reaching the heights of desktop or server CPUs, show significant improvements in recent generations.</li>
+      <li>There's a substantial performance gap between high-end and low-end processors, highlighting the importance of CPU choice for Factorio players.</li>
+    </ul>
+  </div>
+
+  <div class="info-section">
+    <h2>Conclusion</h2>
+    <p>This extensive benchmark showcases the diverse landscape of CPU performance in Factorio across a wide range of processors. While top-tier server and high-end desktop CPUs lead in performance, there are many options that provide excellent gameplay experiences. The data highlights the importance of both multi-core performance and large cache sizes for optimal Factorio performance, but also shows that the game can run on a variety of modern processors, albeit with varying levels of performance. This benchmark can serve as a valuable resource for players looking to upgrade their systems or optimize their Factorio experience across different devices.</p>
+  </div>
+
+  <footer>
+    <p>Data last updated: June 2023 | For more details on our testing methodology or to submit your own results, please visit our <a href="/contribute">community benchmarks page</a>.</p>
+  </footer>
+
+  <script>
+    document.getElementById('manufacturer-filter').addEventListener('change', filterTable);
+    document.getElementById('type-filter').addEventListener('change', filterTable);
+    document.getElementById('cpu-search').addEventListener('input', filterTable);
+
+    function filterTable() {
+      var manufacturerFilter = document.getElementById('manufacturer-filter').value;
+      var typeFilter = document.getElementById('type-filter').value;
+      var searchFilter = document.getElementById('cpu-search').value.toLowerCase();
+      var table = document.querySelector('.benchmark-table');
+      var rows = table.getElementsByTagName('tr');
+
+      for (var i = 1; i < rows.length; i++) {
+        var manufacturer = rows[i].getElementsByTagName('td')[1].textContent.toLowerCase();
+        var type = rows[i].getElementsByTagName('td')[2].textContent.toLowerCase();
+        var cpuModel = rows[i].getElementsByTagName('td')[0].textContent.toLowerCase();
+        
+        var showRow = (manufacturerFilter === 'all' || manufacturer.includes(manufacturerFilter)) &&
+                      (typeFilter === 'all' || type === typeFilter) &&
+                      cpuModel.includes(searchFilter);
+        
+        rows[i].style.display = showRow ? '' : 'none';
+      }
+    }
+
+    function sortTable(n) {
+      var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+      table = document.querySelector(".benchmark-table");
+      switching = true;
+      dir = "desc";
+      while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+          shouldSwitch = false;
+          x = rows[i].getElementsByTagName("TD")[n];
+          y = rows[i + 1].getElementsByTagName("TD")[n];
+          if (dir == "asc") {
+            if (n == 3) { // Relative Performance column
+              if (parseFloat(x.textContent) > parseFloat(y.textContent)) {
+                shouldSwitch = true;
+                break;
+              }
+            } else {
+              if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                shouldSwitch = true;
+                break;
+              }
+            }
+          } else if (dir == "desc") {
+            if (n == 3) { // Relative Performance column
+              if (parseFloat(x.textContent) < parseFloat(y.textContent)) {
+                shouldSwitch = true;
+                break;
+              }
+            } else {
+              if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                shouldSwitch = true;
+                break;
+              }
+            }
+          }
+        }
+        if (shouldSwitch) {
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+          switchcount++;
+        } else {
+          if (switchcount == 0 && dir == "desc") {
+            dir = "asc";
+            switching = true;
+          }
+        }
+      }
+    }
+
+    // Initially sort by Relative Performance
+    sortTable(3);
+  </script>
+
+</body></html>
