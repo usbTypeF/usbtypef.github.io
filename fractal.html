@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Fractal Explorer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #controls {
+            padding: 10px;
+            background-color: #444444;
+        }
+        #fractalCanvas {
+            flex-grow: 1;
+            cursor: move;
+        }
+        #equation, #sliders {
+            margin-top: 10px;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .slider-container label {
+            width: 20px;
+            margin-right: 10px;
+        }
+        input[type="range"] {
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <select id="fractalType">
+            <option value="mandelbrot">Mandelbrot Set</option>
+            <option value="julia">Julia Set</option>
+            <option value="burningShip">Burning Ship Fractal</option>
+            <option value="tricorn">Tricorn Fractal</option>
+        </select>
+        <div id="equation"></div>
+        <div id="sliders"></div>
+    </div>
+    <canvas id="fractalCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('fractalCanvas');
+        const ctx = canvas.getContext('2d');
+        const fractalSelect = document.getElementById('fractalType');
+        const equationDiv = document.getElementById('equation');
+        const slidersDiv = document.getElementById('sliders');
+
+        let zoom = 1;
+        let centerX = 0;
+        let centerY = 0;
+        let isPanning = false;
+        let lastX, lastY;
+        let renderTimeout;
+        let currentFractal = 'mandelbrot';
+        let customParams = { a: 2, b: 2, c: 1, d: 1 };
+
+        const fractalDefaults = {
+            mandelbrot: { centerX: -0.5, centerY: 0, zoom: 0.5 },
+            julia: { centerX: 0, centerY: 0, zoom: 0.8 },
+            burningShip: { centerX: -0.5, centerY: -0.5, zoom: 0.5 },
+            tricorn: { centerX: 0, centerY: 0, zoom: 0.8 },
+        };
+
+        const fractalEquations = {
+            mandelbrot: "z = z^2 + c",
+            julia: "z = z^2 + (-0.7 + 0.27015i)",
+            burningShip: "z = (|Re(z)| + i|Im(z)|)^2 + c",
+            tricorn: "z = (Re(z) - i Im(z))^2 + c",
+        };
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight - document.getElementById('controls').offsetHeight;
+            render();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        fractalSelect.addEventListener('change', (e) => {
+            currentFractal = e.target.value;
+            resetView();
+            updateEquationAndSliders();
+            render();
+        });
+
+        function resetView() {
+            const defaults = fractalDefaults[currentFractal];
+            centerX = defaults.centerX;
+            centerY = defaults.centerY;
+            zoom = defaults.zoom;
+        }
+
+        function updateEquationAndSliders() {
+            equationDiv.textContent = fractalEquations[currentFractal];
+            slidersDiv.innerHTML = '';
+            if (currentFractal === 'custom') {
+                for (let param in customParams) {
+                    const container = document.createElement('div');
+                    container.className = 'slider-container';
+                    const label = document.createElement('label');
+                    label.textContent = param;
+                    const slider = document.createElement('input');
+                    slider.type = 'range';
+                    slider.min = -5;
+                    slider.max = 5;
+                    slider.step = 0.1;
+                    slider.value = customParams[param];
+                    slider.addEventListener('input', (e) => {
+                        customParams[param] = parseFloat(e.target.value);
+                        render();
+                    });
+                    container.appendChild(label);
+                    container.appendChild(slider);
+                    slidersDiv.appendChild(container);
+                }
+            }
+        }
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+            zoom *= zoomFactor;
+            render(true);
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            isPanning = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isPanning) {
+                const dx = e.clientX - lastX;
+                const dy = e.clientY - lastY;
+                centerX -= dx / (zoom * canvas.width);
+                centerY -= dy / (zoom * canvas.height);
+                lastX = e.clientX;
+                lastY = e.clientY;
+                render(true);
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isPanning = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isPanning = false;
+        });
+
+        function render(lowQuality = false) {
+            clearTimeout(renderTimeout);
+            
+            const pixelSize = lowQuality ? 5 : 1;
+            const width = Math.ceil(canvas.width / pixelSize);
+            const height = Math.ceil(canvas.height / pixelSize);
+
+            const imageData = ctx.createImageData(width, height);
+            const data = imageData.data;
+
+            for (let x = 0; x < width; x++) {
+                for (let y = 0; y < height; y++) {
+                    const realX = (x - width / 2) / (zoom * width) + centerX;
+                    const realY = (y - height / 2) / (zoom * height) + centerY;
+                    const color = calculateFractal(realX, realY);
+                    const index = (y * width + x) * 4;
+                    data[index] = color.r;
+                    data[index + 1] = color.g;
+                    data[index + 2] = color.b;
+                    data[index + 3] = 255;
+                }
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+            
+            if (pixelSize > 1) {
+                ctx.imageSmoothingEnabled = false;
+                ctx.drawImage(canvas, 0, 0, width, height, 0, 0, canvas.width, canvas.height);
+            }
+
+            if (lowQuality) {
+                renderTimeout = setTimeout(() => render(false), 500);
+            }
+        }
+
+        function calculateFractal(x, y) {
+            switch (currentFractal) {
+                case 'mandelbrot':
+                    return mandelbrot(x, y);
+                case 'julia':
+                    return julia(x, y);
+                case 'burningShip':
+                    return burningShip(x, y);
+                case 'tricorn':
+                    return tricorn(x, y);
+                default:
+                    return { r: 0, g: 0, b: 0 };
+            }
+        }
+
+        function mandelbrot(x0, y0) {
+            let x = 0, y = 0;
+            let iteration = 0;
+            const maxIteration = 1000;
+            while (x*x + y*y < 4 && iteration < maxIteration) {
+                const xtemp = x*x - y*y + x0;
+                y = 2*x*y + y0;
+                x = xtemp;
+                iteration++;
+            }
+            return hslToRgb(iteration / maxIteration, 1, iteration < maxIteration ? 0.5 : 0);
+        }
+
+        function julia(x, y) {
+            const cx = -0.7;
+            const cy = 0.27015;
+            let zx = x;
+            let zy = y;
+            let iteration = 0;
+            const maxIteration = 1000;
+            while (zx*zx + zy*zy < 4 && iteration < maxIteration) {
+                const xtemp = zx*zx - zy*zy + cx;
+                zy = 2*zx*zy + cy;
+                zx = xtemp;
+                iteration++;
+            }
+            return hslToRgb(iteration / maxIteration, 1, iteration < maxIteration ? 0.5 : 0);
+        }
+
+        function burningShip(x0, y0) {
+            let x = 0, y = 0;
+            let iteration = 0;
+            const maxIteration = 1000;
+            while (x*x + y*y < 4 && iteration < maxIteration) {
+                const xtemp = x*x - y*y + x0;
+                y = Math.abs(2*x*y) + y0;
+                x = xtemp;
+                iteration++;
+            }
+            return hslToRgb(iteration / maxIteration, 1, iteration < maxIteration ? 0.5 : 0);
+        }
+
+        function tricorn(x0, y0) {
+            let x = 0, y = 0;
+            let iteration = 0;
+            const maxIteration = 1000;
+            while (x*x + y*y < 4 && iteration < maxIteration) {
+                const xtemp = x*x - y*y + x0;
+                y = -2*x*y + y0;
+                x = xtemp;
+                iteration++;
+            }
+            return hslToRgb(iteration / maxIteration, 1, iteration < maxIteration ? 0.5 : 0);
+        }
+
+        function hslToRgb(h, s, l) {
+            let r, g, b;
+            if (s === 0) {
+                r = g = b = l;
+            } else {
+                const hue2rgb = (p, q, t) => {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                };
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+            return {
+                r: Math.round(r * 255),
+                g: Math.round(g * 255),
+                b: Math.round(b * 255)
+            };
+        }
+
+        resetView();
+        updateEquationAndSliders();
+        render();
+    </script>
+</body>
+</html>
