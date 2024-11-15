@@ -1,0 +1,208 @@
+<html><head><base href="test">
+<style>
+  body {
+    font-family: system-ui;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background: #1a1a1a;
+    color: #e0e0e0;
+  }
+
+  .game-container {
+    text-align: center;
+    padding: 2rem;
+    background: #2d2d2d;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    width: 90%;
+    max-width: 800px;
+  }
+
+  .number-display {
+    font-size: 8rem;
+    font-weight: bold;
+    margin: 2rem 0;
+    min-height: 11rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+
+  .input-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  #userInput {
+    display: none; /* Hide initially */
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    width: 80%;
+    max-width: 300px;
+    margin: 1rem 0;
+    border: 2px solid #444;
+    border-radius: 6px;
+    text-align: center;
+    background: #333;
+    color: #fff;
+  }
+
+  #startButton {
+    font-size: 1.75rem;
+    padding: 1rem 2rem;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-bottom: 1rem;
+  }
+
+  #startButton:hover {
+    background: #45a049;
+  }
+
+  .stats {
+    margin-top: 2rem;
+    font-size: 1.1rem;
+  }
+
+  .result-message {
+    margin-top: 1rem;
+    font-weight: bold;
+    color: #4CAF50;
+  }
+</style>
+</head>
+<body>
+<div class="game-container">
+  <h1>Tachistoscope</h1>
+  <div class="number-display" id="numberDisplay"></div>
+  <div class="input-container">
+    <button id="startButton">Start Test</button>
+    <input type="text" id="userInput" placeholder="Type the number you saw" maxlength="20">
+  </div>
+  <div class="stats">
+    <p>Current Level: <span id="level">1</span> digits</p>
+    <p>Correct: <span id="correct">0</span> | Wrong: <span id="wrong">0</span></p>
+    <p>Consecutive: <span id="consecutive">0</span></p>
+  </div>
+  <div id="resultMessage" class="result-message"></div>
+</div>
+
+<script>
+let currentLevel = 1;
+let correctCount = 0;
+let wrongCount = 0;
+let currentNumber = '';
+let isDisplaying = false;
+let consecutiveCorrect = 0;
+let consecutiveWrong = 0;
+let currentLevelAttempts = 0;
+let currentLevelCorrect = 0;
+
+const userInput = document.getElementById('userInput');
+const startButton = document.getElementById('startButton');
+
+userInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && !isDisplaying) {
+        checkAnswer();
+    }
+});
+
+startButton.addEventListener('click', function() {
+    startButton.style.display = 'none';
+    userInput.style.display = 'block';
+    startRound();
+});
+
+function generateNumber(length) {
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += Math.floor(Math.random() * 10);
+    }
+    return result;
+}
+
+function startRound() {
+    if (isDisplaying) return;
+    
+    isDisplaying = true;
+    userInput.value = '';
+    userInput.disabled = true;
+    currentNumber = generateNumber(currentLevel);
+    
+    document.getElementById('numberDisplay').textContent = currentNumber;
+    
+    setTimeout(() => {
+        document.getElementById('numberDisplay').textContent = ' ';
+        userInput.disabled = false;
+        userInput.focus();
+        isDisplaying = false;
+    }, 100);
+}
+
+function checkAnswer() {
+    if (isDisplaying) return;
+    
+    const userAnswer = userInput.value;
+    
+    if (userAnswer === currentNumber) {
+        correctCount++;
+        currentLevelCorrect++;
+        consecutiveCorrect++;
+        consecutiveWrong = 0;
+        if (consecutiveCorrect >= 3) {
+            currentLevel++;
+            consecutiveCorrect = 0;
+            currentLevelAttempts = 0;
+            currentLevelCorrect = 0;
+        }
+    } else {
+        wrongCount++;
+        consecutiveCorrect = 0;
+        consecutiveWrong++;
+        if (consecutiveWrong >= 3) {
+            currentLevel = Math.max(1, currentLevel - 1);
+            consecutiveWrong = 0;
+            currentLevelAttempts = 0;
+            currentLevelCorrect = 0;
+        }
+    }
+    
+    currentLevelAttempts++;
+    
+    // Check if we should end the test
+    if (currentLevelAttempts >= 11) {
+        const currentAccuracy = currentLevelCorrect / currentLevelAttempts;
+        if (currentAccuracy >= 0.3 && currentAccuracy <= 0.7) {
+            const finalDigits = currentLevel - (1 - currentAccuracy);  // Changed formula here
+            document.getElementById('resultMessage').textContent = 
+                `Test Complete! Your digit span is ${finalDigits.toFixed(1)} digits`;
+            return;
+        }
+    }
+    
+    updateStats();
+    startRound();
+}
+
+function updateStats() {
+    document.getElementById('level').textContent = currentLevel;
+    document.getElementById('correct').textContent = correctCount;
+    document.getElementById('wrong').textContent = wrongCount;
+    document.getElementById('consecutive').textContent = consecutiveCorrect;
+}
+
+// Initialize number display
+document.getElementById('numberDisplay').textContent = ' ';
+</script>
+</body></html>
