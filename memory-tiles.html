@@ -1,0 +1,352 @@
+<html><head><base href="." />
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    font-family: 'Work Sans', Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.game-container {
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0.125rem;
+    margin: 20px auto;
+    padding: 0.125rem;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    width: fit-content;
+}
+
+.tile {
+    width: 50px;
+    height: 50px;
+    background-color: #333;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    transition: all 0.3s;
+    margin: 0;
+}
+
+.tile.show {
+    background-color: #444;
+}
+
+.tile.show[data-number]:after {
+    content: attr(data-number);
+    color: white;
+    font-size: 24px;
+    font-family: 'Work Sans', Arial, sans-serif;
+}
+
+.tile.matched {
+    background-color: #4CAF50;
+}
+
+.tile.matched[data-number]:after {
+    content: attr(data-number);
+    color: white;
+}
+
+.tile.wrong {
+    background-color: #f44336;
+}
+
+.tile:hover {
+    background-color: #444;
+}
+
+.info {
+    margin: 20px 0;
+    font-size: 20px;
+}
+
+button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    font-size: 16px;
+    margin: 20px auto;
+    cursor: pointer;
+    border-radius: 5px;
+    font-family: 'Work Sans', Arial, sans-serif;
+}
+
+.result {
+    font-size: 24px;
+    margin: 20px 0;
+}
+
+.win-screen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.win-screen.show {
+    display: flex;
+}
+
+.win-text {
+    font-size: 48px;
+    color: gold;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    margin-bottom: 20px;
+}
+
+.game-over-screen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.game-over-screen.show {
+    display: flex;
+}
+
+.game-over-text {
+    font-size: 48px;
+    color: #f44336;
+    text-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+    margin-bottom: 20px;
+}
+
+.stats-text {
+    font-size: 24px;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-weight: 600;
+}
+</style>
+</head>
+<body>
+<div class="game-container">
+    <h1>Number Sequence Memory</h1>
+    <div class="info">Round: <span id="round">1</span> | Numbers to Match: <span id="pairsLeft">1</span></div>
+    <div class="info">Current Round Time: <span id="currentTime">0</span> seconds</div>
+    <div class="grid" id="grid"></div>
+    <button id="startButton">Start Game</button>
+    <div class="result" id="result"></div>
+</div>
+
+<div class="win-screen" id="winScreen">
+    <div class="win-text">Congratulations!</div>
+    <div class="win-text">You've Completed All Sequences!</div>
+    <div class="stats-text">Total Time: <span id="finalTotalTime">0</span> seconds</div>
+    <button id="restartButton">Play Again</button>
+</div>
+
+<div class="game-over-screen" id="gameOverScreen">
+    <div class="game-over-text">Game Over!</div>
+    <div class="stats-text">Rounds Completed: <span id="roundsCompleted">0</span></div>
+    <div class="stats-text">Total Time: <span id="totalTime">0</span> seconds</div>
+    <button id="restartButtonGameOver">Try Again</button>
+</div>
+
+<script>
+let currentRound = 1;
+let expectedNumber = 1;
+let matchedNumbers = new Set();
+let canClick = false;
+let gameStartTime;
+let roundStartTime;
+let totalTime = 0;
+let currentTimeInterval;
+
+const grid = document.getElementById('grid');
+const startButton = document.getElementById('startButton');
+const roundDisplay = document.getElementById('round');
+const pairsLeftDisplay = document.getElementById('pairsLeft');
+const resultDisplay = document.getElementById('result');
+const winScreen = document.getElementById('winScreen');
+const gameOverScreen = document.getElementById('gameOverScreen');
+const restartButton = document.getElementById('restartButton');
+const restartButtonGameOver = document.getElementById('restartButtonGameOver');
+const roundsCompletedDisplay = document.getElementById('roundsCompleted');
+const totalTimeDisplay = document.getElementById('totalTime');
+const currentTimeDisplay = document.getElementById('currentTime');
+const finalTotalTimeDisplay = document.getElementById('finalTotalTime');
+
+function updateCurrentTime() {
+    if (roundStartTime) {
+        const currentTime = ((Date.now() - roundStartTime) / 1000).toFixed(1);
+        currentTimeDisplay.textContent = currentTime;
+    }
+}
+
+function startTimer() {
+    if (currentTimeInterval) {
+        clearInterval(currentTimeInterval);
+    }
+    roundStartTime = Date.now();
+    currentTimeInterval = setInterval(updateCurrentTime, 100);
+}
+
+function stopTimer() {
+    if (currentTimeInterval) {
+        clearInterval(currentTimeInterval);
+        const roundTime = (Date.now() - roundStartTime) / 1000;
+        totalTime += roundTime;
+        return roundTime;
+    }
+    return 0;
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function createTiles() {
+    grid.innerHTML = '';
+    let positions = Array.from({length: 64}, (_, i) => i);
+    positions = shuffleArray(positions);
+    
+    const numbers = Array.from({length: currentRound}, (_, i) => i + 1);
+    
+    for (let i = 0; i < 64; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.addEventListener('click', () => handleTileClick(tile));
+        grid.appendChild(tile);
+    }
+    
+    const tiles = document.querySelectorAll('.tile');
+    numbers.forEach((number, index) => {
+        const position = positions[index];
+        tiles[position].dataset.number = number;
+    });
+}
+
+function showNumbers() {
+    const tiles = document.querySelectorAll('.tile[data-number]');
+    tiles.forEach(tile => tile.classList.add('show'));
+    
+    setTimeout(() => {
+        tiles.forEach(tile => {
+            if (!matchedNumbers.has(parseInt(tile.dataset.number))) {
+                tile.classList.remove('show');
+            }
+        });
+        canClick = true;
+        expectedNumber = 1;
+        startTimer();
+    }, 1000);
+}
+
+function handleTileClick(tile) {
+    if (!canClick || tile.classList.contains('matched')) return;
+    
+    if (!tile.dataset.number) {
+        tile.classList.add('wrong');
+        setTimeout(() => gameOver(), 500);
+        return;
+    }
+    
+    const number = parseInt(tile.dataset.number);
+    
+    if (number === expectedNumber) {
+        tile.classList.add('matched');
+        matchedNumbers.add(number);
+        expectedNumber++;
+        
+        if (matchedNumbers.size === currentRound) {
+            const roundTime = stopTimer().toFixed(2);
+            endRound(roundTime);
+        }
+    } else {
+        tile.classList.add('wrong');
+        setTimeout(() => gameOver(), 500);
+    }
+}
+
+function endRound(time) {
+    if (currentRound === 20) {
+        finalTotalTimeDisplay.textContent = totalTime.toFixed(2);
+        winScreen.classList.add('show');
+        return;
+    }
+    
+    resultDisplay.textContent = `Round ${currentRound} completed! Time: ${time}s`;
+    currentRound++;
+    startButton.textContent = 'Next Round';
+    startButton.style.display = 'block';
+    matchedNumbers.clear();
+}
+
+function gameOver() {
+    stopTimer();
+    roundsCompletedDisplay.textContent = currentRound - 1;
+    totalTimeDisplay.textContent = totalTime.toFixed(2);
+    gameOverScreen.classList.add('show');
+}
+
+function startRound() {
+    startButton.style.display = 'none';
+    resultDisplay.textContent = '';
+    roundDisplay.textContent = currentRound;
+    pairsLeftDisplay.textContent = currentRound;
+    currentTimeDisplay.textContent = '0.0';
+    
+    createTiles();
+    setTimeout(showNumbers, 500);
+}
+
+function restartGame() {
+    currentRound = 1;
+    totalTime = 0;
+    matchedNumbers.clear();
+    winScreen.classList.remove('show');
+    gameOverScreen.classList.remove('show');
+    currentTimeDisplay.textContent = '0.0';
+    startRound();
+}
+
+startButton.addEventListener('click', startRound);
+restartButton.addEventListener('click', restartGame);
+restartButtonGameOver.addEventListener('click', restartGame);
+</script>
+</body></html>

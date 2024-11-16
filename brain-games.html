@@ -1,0 +1,118 @@
+<html><head><base href="." />
+<meta charset="UTF-8">
+<title>Brain Games</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+    --background: #1a1a1a;
+    --surface: #2d2d2d;
+    --primary: #6e8fff;
+    --error: #ff6e6e;
+    --text: #ffffff;
+    --text-secondary: #b0b0b0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Work Sans', sans-serif;
+}
+
+body {
+    background-color: var(--background);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2.66rem;
+}
+
+h1 {
+    font-size: 4rem;
+    color: var(--primary);
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 600px; /* Reduced from 900px */
+    width: 100%;
+}
+
+.grid-item {
+    background-color: var(--surface);
+    border-radius: 10px;
+    padding: 1.5rem; /* Reduced from 2rem */
+    text-align: center;
+    transition: transform 0.2s, background-color 0.2s;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grid-item:hover {
+    transform: scale(1.05);
+    background-color: var(--primary);
+}
+
+.grid-item a {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 1.2rem; /* Reduced from 1.5rem */
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .grid-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+<body>
+    <h1>Brain Games</h1>
+    <div class="grid-container">
+        <div class="grid-item">
+            <a href="quick-type">Quick Type</a>
+        </div>
+        <div class="grid-item">
+            <a href="sudoku">Sudoku</a>
+        </div>
+        <div class="grid-item">
+            <a href="timer-sudoku">Timer Sudoku</a>
+        </div>
+        <div class="grid-item">
+            <a href="math-match">Math Match</a>
+        </div>
+        <div class="grid-item">
+            <a href="shape-match">Shape Match</a>
+        </div>
+        <div class="grid-item">
+            <a href="memory-tiles">Memory Tiles</a>
+        </div>
+        <div class="grid-item">
+            <a href="memory-match">Memory Match</a>
+        </div>
+        <div class="grid-item">
+            <a href="tachistoscope">Tachistoscope</a>
+        </div>
+        <div class="grid-item">
+            <a href="memorytest">Memory Test</a>
+        </div>
+    </div>
+</body>
+</html>

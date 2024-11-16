@@ -1,0 +1,197 @@
+<html><head><base href="." />
+<meta charset="UTF-8">
+<title>Quick Type Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+    --background: #1a1a1a;
+    --surface: #2d2d2d;
+    --primary: #6e8fff;
+    --error: #ff6e6e;
+    --text: #ffffff;
+    --text-secondary: #b0b0b0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Work Sans', sans-serif;
+}
+
+body {
+    background-color: var(--background);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2.66rem;
+}
+
+#welcome-content {
+    text-align: center;
+    margin-bottom: 2.66rem;
+}
+
+#welcome-content h1 {
+    font-size: 4rem;
+    color: var(--primary);
+    margin-bottom: 1.33rem;
+}
+
+#welcome-content p {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto 1.33rem;
+}
+
+.button {
+    background-color: var(--surface);
+    color: var(--text);
+    border: none;
+    padding: 0.66rem 1.33rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin: 10px;
+}
+
+.button:hover {
+    background-color: var(--primary);
+}
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+#current-char {
+    font-size: 8rem;
+    color: var(--primary);
+    min-height: 12rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#timer {
+    font-size: 2rem;
+    color: var(--text-secondary);
+}
+
+#score {
+    color: var(--primary);
+    font-size: 1.2rem;
+    margin-top: 10px;
+}
+
+#input-field {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+</style>
+</head>
+<body>
+    <div id="welcome-content">
+        <h1>Quick Type Challenge</h1>
+        <p>Type as many characters as you can in 10 seconds! When you're ready, click Start!</p>
+    </div>
+    
+    <div id="game-container">
+        <div id="timer">Time: 10.0s</div>
+        <div id="current-char">-</div>
+        <button class="button" id="start-button" onclick="startGame()">Start Game</button>
+        <div id="score">Score: 0</div>
+    </div>
+    <input id="input-field" type="text" autocomplete="off">
+
+    <script>
+        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*(';
+        let currentChar = '';
+        let score = 0;
+        let gameActive = false;
+        let timeLeft = 10.0;
+        let timerInterval;
+        
+        const charDisplay = document.getElementById('current-char');
+        const timerDisplay = document.getElementById('timer');
+        const scoreDisplay = document.getElementById('score');
+        const startButton = document.getElementById('start-button');
+        const inputField = document.getElementById('input-field');
+
+        function getRandomChar() {
+            return chars[Math.floor(Math.random() * chars.length)];
+        }
+
+        function updateTimer() {
+            timeLeft -= 0.1;
+            timerDisplay.textContent = `Time: ${timeLeft.toFixed(1)}s`;
+            
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = 10.0;
+            gameActive = true;
+            startButton.style.display = 'none';
+            scoreDisplay.textContent = 'Score: 0';
+            inputField.value = '';
+            inputField.focus();
+            
+            // Show first character
+            currentChar = getRandomChar();
+            charDisplay.textContent = currentChar;
+            
+            // Start timer
+            timerInterval = setInterval(updateTimer, 100);
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            charDisplay.textContent = '✓';
+            startButton.style.display = 'block';
+            startButton.textContent = 'Play Again';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!gameActive) return;
+            
+            if (e.key === currentChar) {
+                score++;
+                scoreDisplay.textContent = `Score: ${score}`;
+                currentChar = getRandomChar();
+                charDisplay.textContent = currentChar;
+                
+                // Visual feedback
+                charDisplay.style.color = 'var(--primary)';
+            } else {
+                // Visual feedback for wrong key
+                charDisplay.style.color = 'var(--error)';
+            }
+            
+            // Reset color after brief delay
+            setTimeout(() => {
+                charDisplay.style.color = 'var(--primary)';
+            }, 100);
+        });
+
+        // Ensure input field stays focused during game
+        setInterval(() => {
+            if (gameActive) {
+                inputField.focus();
+            }
+        }, 100);
+    </script>
+</body></html>

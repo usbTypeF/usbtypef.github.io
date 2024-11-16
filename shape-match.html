@@ -1,0 +1,390 @@
+<html><head><base href="." />
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    font-family: 'Work Sans', Arial, sans-serif;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-container {
+    text-align: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.game-area {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px;
+    min-height: 500px;
+}
+
+.shapes-container, .target-container {
+    width: 45%;
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 10px;
+    min-height: 500px;
+}
+
+.clickable-shape {
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.clickable-shape.selected {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px #fff;
+}
+
+.clickable-shape:hover {
+    transform: scale(1.1);
+}
+
+.target-shape {
+    position: relative;
+    opacity: 0.3;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer; /* Add cursor pointer for target shapes */
+}
+
+.info {
+    margin: 20px 0;
+    font-size: 20px;
+}
+
+button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    font-size: 16px;
+    margin: 20px auto;
+    cursor: pointer;
+    border-radius: 5px;
+    font-family: 'Work Sans', Arial, sans-serif;
+}
+
+.win-screen, .game-over-screen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.win-screen.show, .game-over-screen.show {
+    display: flex;
+}
+
+.win-text {
+    font-size: 48px;
+    color: gold;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    margin-bottom: 20px;
+}
+
+.game-over-text {
+    font-size: 48px;
+    color: #f44336;
+    text-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+    margin-bottom: 20px;
+}
+
+.stats-text {
+    font-size: 24px;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-weight: 600;
+}
+
+.timer {
+    font-size: 32px;
+    color: #ff4444;
+    margin: 10px 0;
+}
+</style>
+</head>
+<body>
+<div class="game-container">
+    <h1>Shape Matching Game</h1>
+    <div class="info">Round: <span id="round">1</span> | Shapes to Match: <span id="shapesLeft">1</span></div>
+    <div class="timer" id="timer">5.0</div>
+    <div class="game-area">
+        <div class="shapes-container" id="shapesContainer"></div>
+        <div class="target-container" id="targetContainer"></div>
+    </div>
+    <button id="startButton">Start Round</button>
+</div>
+
+<div class="win-screen" id="winScreen">
+    <div class="win-text">Congratulations!</div>
+    <div class="win-text">You've Completed All Rounds!</div>
+    <div class="stats-text">Total Time: <span id="finalTotalTime">0</span> seconds</div>
+    <button id="restartButton">Play Again</button>
+</div>
+
+<div class="game-over-screen" id="gameOverScreen">
+    <div class="game-over-text">Game Over!</div>
+    <div class="stats-text">Rounds Completed: <span id="roundsCompleted">0</span></div>
+    <div class="stats-text">Total Time: <span id="totalTime">0</span> seconds</div>
+    <button id="restartButtonGameOver">Try Again</button>
+</div>
+
+<script>
+const shapes = ['circle', 'square', 'triangle', 'star', 'pentagon', 'hexagon'];
+const colors = ['#ff4444', '#44ff44', '#4444ff', '#ffff44', '#ff44ff', '#44ffff'];
+let currentRound = 1;
+let matchedShapes = 0;
+let totalTime = 0;
+let timerInterval;
+let timeLeft = 5;
+let selectedShape = null;
+
+function generateSVG(shape, color, number, size = 100) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", size);
+    svg.setAttribute("height", size);
+    svg.setAttribute("viewBox", "0 0 100 100");
+
+    let path;
+    switch(shape) {
+        case 'square':
+            path = `M20,20 h60 v60 h-60 z`;
+            break;
+        case 'triangle':
+            path = `M50,20 L80,80 L20,80 z`;
+            break;
+        case 'circle':
+            path = `M50,50 m-30,0 a30,30 0 1,0 60,0 a30,30 0 1,0 -60,0`;
+            break;
+        case 'star':
+            const points = [];
+            for(let i = 0; i < 5; i++) {
+                const angle = (i * 72 - 90) * Math.PI / 180;
+                points.push(`${50 + 30 * Math.cos(angle)},${50 + 30 * Math.sin(angle)}`);
+                const innerAngle = ((i * 72 + 36) - 90) * Math.PI / 180;
+                points.push(`${50 + 15 * Math.cos(innerAngle)},${50 + 15 * Math.sin(innerAngle)}`);
+            }
+            path = `M${points.join(' L')} Z`;
+            break;
+        default:
+            path = `M50,20 L80,50 L50,80 L20,50 Z`;
+    }
+
+    const shapePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    shapePath.setAttribute("d", path);
+    shapePath.setAttribute("fill", color);
+    svg.appendChild(shapePath);
+
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", "50");
+    text.setAttribute("y", "50"); // Changed from 60 to 50 for perfect center
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("dominant-baseline", "middle"); // This ensures vertical centering
+    text.setAttribute("fill", "white");
+    text.setAttribute("stroke", "black");  // Add black outline
+    text.setAttribute("stroke-width", "1"); // Control outline thickness
+    text.setAttribute("font-size", "30"); // Changed from 20 to 30
+    text.textContent = number;
+    svg.appendChild(text);
+
+    return svg;
+}
+
+function shuffleArray(array) {
+    for(let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function createRound() {
+    const shapesContainer = document.getElementById('shapesContainer');
+    const targetContainer = document.getElementById('targetContainer');
+    shapesContainer.innerHTML = '';
+    targetContainer.innerHTML = '';
+
+    const roundShapes = [];
+    for(let i = 0; i < currentRound; i++) {
+        const shape = {
+            type: shapes[Math.floor(Math.random() * shapes.length)],
+            color: colors[Math.floor(Math.random() * colors.length)],
+            number: i + 1
+        };
+        roundShapes.push(shape);
+    }
+
+    // Create 25 grid cells for each container
+    for(let i = 0; i < 25; i++) {
+        const draggableCell = document.createElement('div');
+        const targetCell = document.createElement('div');
+        draggableCell.className = 'grid-cell';
+        targetCell.className = 'grid-cell';
+        shapesContainer.appendChild(draggableCell);
+        targetContainer.appendChild(targetCell);
+    }
+
+    // Randomly place shapes in the grid
+    const availableDragCells = [...shapesContainer.children];
+    const availableTargetCells = [...targetContainer.children];
+
+    roundShapes.forEach((shape, index) => {
+        const draggable = generateSVG(shape.type, shape.color, shape.number);
+        const target = generateSVG(shape.type, shape.color, shape.number);
+        
+        const draggableDiv = document.createElement('div');
+        draggableDiv.className = 'clickable-shape';
+        draggableDiv.appendChild(draggable);
+        draggableDiv.dataset.shapeId = index;
+
+        const targetDiv = document.createElement('div');
+        targetDiv.className = 'target-shape';
+        targetDiv.appendChild(target);
+        targetDiv.dataset.shapeId = index;
+
+        // Randomly select and remove cells for placement
+        const dragCellIndex = Math.floor(Math.random() * availableDragCells.length);
+        const targetCellIndex = Math.floor(Math.random() * availableTargetCells.length);
+
+        const dragCell = availableDragCells.splice(dragCellIndex, 1)[0];
+        const targetCell = availableTargetCells.splice(targetCellIndex, 1)[0];
+
+        dragCell.appendChild(draggableDiv);
+        targetCell.appendChild(targetDiv);
+
+        setupClickHandling(draggableDiv, targetDiv);
+    });
+
+    timeLeft = 5;
+    updateTimer();
+    startTimer();
+}
+
+function setupClickHandling(draggable, target) {
+    draggable.classList.remove('draggable-shape');
+    draggable.classList.add('clickable-shape');
+    draggable.draggable = false;
+    
+    draggable.addEventListener('click', () => {
+        // Clear previous selection
+        if (selectedShape) {
+            selectedShape.classList.remove('selected');
+        }
+        
+        // Select new shape
+        selectedShape = draggable;
+        draggable.classList.add('selected');
+    });
+
+    target.addEventListener('click', () => {
+        if (selectedShape && selectedShape.dataset.shapeId === target.dataset.shapeId) {
+            selectedShape.style.display = 'none';
+            selectedShape.classList.remove('selected');
+            target.style.opacity = '1';
+            selectedShape = null;
+            matchedShapes++;
+            checkRoundComplete();
+        } else if (selectedShape) {
+            // Wrong match - game over
+            clearInterval(timerInterval);
+            gameOver();
+        }
+    });
+}
+
+function startTimer() {
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timeLeft -= 0.1;
+        updateTimer();
+        if(timeLeft <= 0) {
+            clearInterval(timerInterval);
+            gameOver();
+        }
+    }, 100);
+}
+
+function updateTimer() {
+    document.getElementById('timer').textContent = timeLeft.toFixed(1);
+}
+
+function checkRoundComplete() {
+    if(matchedShapes === currentRound) {
+        clearInterval(timerInterval);
+        totalTime += (5 - timeLeft);
+        if(currentRound === 10) {
+            document.getElementById('finalTotalTime').textContent = totalTime.toFixed(2);
+            document.getElementById('winScreen').classList.add('show');
+        } else {
+            currentRound++;
+            matchedShapes = 0;
+            document.getElementById('round').textContent = currentRound;
+            document.getElementById('shapesLeft').textContent = currentRound;
+            document.getElementById('startButton').style.display = 'block';
+        }
+    }
+}
+
+function gameOver() {
+    document.getElementById('roundsCompleted').textContent = currentRound - 1;
+    document.getElementById('totalTime').textContent = totalTime.toFixed(2);
+    document.getElementById('gameOverScreen').classList.add('show');
+}
+
+function restartGame() {
+    currentRound = 1;
+    matchedShapes = 0;
+    totalTime = 0;
+    document.getElementById('winScreen').classList.remove('show');
+    document.getElementById('gameOverScreen').classList.remove('show');
+    document.getElementById('round').textContent = currentRound;
+    document.getElementById('shapesLeft').textContent = currentRound;
+    createRound();
+}
+
+document.getElementById('startButton').addEventListener('click', function() {
+    this.style.display = 'none';
+    createRound();
+});
+
+document.getElementById('restartButton').addEventListener('click', restartGame);
+document.getElementById('restartButtonGameOver').addEventListener('click', restartGame);
+</script>
+</body></html>

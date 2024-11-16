@@ -1,0 +1,473 @@
+<html><head><base href="." />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600&display=swap');
+
+:root {
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --grid-color: #333;  /* Light grey for normal lines */
+    --grid-color-thick: #000;  /* Black for thick lines */
+    --cell-hover: #2a2a2a;
+    --highlight: #3a3a3a;
+    --error: #ff4444;
+    --input-bg: #252525;
+    --cell-bg: #222222;
+    --success: #4CAF50;
+    --row-col-highlight: #2a2a2a;
+}
+
+body {
+    font-family: 'Work Sans', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 24px; /* Updated padding */
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(9, 60px); /* Updated cell size */
+    gap: 1.2px; /* Updated gap */
+    background-color: var(--grid-color);
+    padding: 1.2px; /* Updated padding */
+    margin: 24px 0; /* Updated margin */
+    position: relative;
+    border: 4.8px solid #000;  /* Updated border */
+}
+
+.grid::before {
+    content: '';
+    position: absolute;
+    left: calc(33.33% + 1.2px);
+    top: 0;
+    width: 4.8px; /* Updated width */
+    height: 100%;
+    background-color: var(--grid-color-thick);
+    z-index: 2; /* Ensure thick line is on top */
+}
+
+.grid::after {
+    content: '';
+    position: absolute;
+    left: calc(66.66% + 1.2px);
+    top: 0;
+    width: 4.8px; /* Updated width */
+    height: 100%;
+    background-color: var(--grid-color-thick);
+    z-index: 2; /* Ensure thick line is on top */
+}
+
+.horizontal-line {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 4.8px; /* Updated height */
+    background-color: var(--grid-color-thick);
+    z-index: 2; /* Ensure thick line is on top */
+}
+
+.cell {
+    width: 60px; /* Updated width */
+    height: 60px; /* Updated height */
+    background-color: var(--cell-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.4em; /* Updated font size */
+    cursor: pointer;
+    transition: background-color 0.2s;
+    position: relative;
+    border: 1.2px solid var(--grid-color); /* Updated border */
+    z-index: 1; /* Ensure cells are beneath the lines */
+}
+
+.cell:hover {
+    background-color: var(--cell-hover);
+}
+
+.cell.highlight {
+    background-color: var(--row-col-highlight);
+}
+
+.cell.fixed {
+    font-weight: 600;
+}
+
+.cell.error {
+    color: var(--error);
+}
+
+.cell input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-size: 2.4em; /* Updated font size */
+    text-align: center;
+    font-family: 'Work Sans', sans-serif;
+    padding: 0;
+    outline: none;
+}
+
+.cell input:focus {
+    background-color: var(--cell-hover);
+}
+
+.timer {
+    font-size: 3.2em; /* Updated font size */
+    margin: 24px 0; /* Updated margin */
+}
+
+.round-counter {
+    font-size: 2.4em;
+    margin-bottom: 24px;
+    color: var(--text-color);
+}
+
+.next-round {
+    background-color: var(--success);
+    margin-top: 24px; /* Updated margin */
+    display: none;
+}
+
+.next-round.visible {
+    display: block;
+}
+
+.input-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--input-bg);
+    padding: 24px; /* Updated padding */
+    border-radius: 5px;
+    display: none;
+}
+
+.input-modal.visible {
+    display: block;
+}
+
+.input-modal input {
+    width: 60px; /* Updated width */
+    height: 60px; /* Updated height */
+    font-size: 2.4em; /* Updated font size */
+    text-align: center;
+    background-color: var(--cell-bg);
+    color: var(--text-color);
+    border: none;
+    border-radius: 3px;
+}
+
+.game-over {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 1000; /* Add this line to ensure it's above everything */
+}
+
+.game-over.visible {
+    display: flex;
+}
+
+.game-over h1 {
+    color: var(--text-color);
+    font-size: 4.8em; /* Updated font size */
+    margin-bottom: 24px; /* Updated margin */
+}
+
+.game-over .final-round {
+    color: var(--text-color);
+    font-size: 2.4em;
+    margin-bottom: 24px;
+}
+
+button {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border: none;
+    padding: 12px 24px; /* Updated padding */
+    font-family: 'Work Sans', sans-serif;
+    font-size: 1.92em; /* Updated font size */
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: var(--highlight);
+}
+</style>
+</head>
+<body>
+<div class="timer">30.0</div>
+<div class="round-counter">Round 1</div>
+<div class="grid">
+    <div class="horizontal-line" style="top: calc(33.33% + 1.2px);"></div>
+    <div class="horizontal-line" style="top: calc(66.66% + 1.2px);"></div>
+</div>
+<button class="next-round" onclick="game.nextRound()">Next Round</button>
+<div class="input-modal">
+    <input type="number" min="1" max="9">
+</div>
+<div class="game-over">
+    <h1>Game Over!</h1>
+    <div class="final-round">Round 1</div>
+    <button onclick="startNewGame()">Play Again</button>
+</div>
+
+<script>
+class SudokuGame {
+    constructor() {
+        this.board = Array(9).fill().map(() => Array(9).fill(0));
+        this.solution = Array(9).fill().map(() => Array(9).fill(0));
+        this.removedCount = 1;
+        this.timeLeft = 30.0;
+        this.timer = null;
+        this.selectedCell = null;
+        this.round = 1; // Add round counter
+        this.updateRoundDisplay(); // Add this line
+        this.initialize();
+        this.setupHoverEffects();
+    }
+
+    updateRoundDisplay() {
+        document.querySelector('.round-counter').textContent = `Round ${this.round}`;
+        document.querySelector('.final-round').textContent = `Round ${this.round}`;
+    }
+    
+    setupHoverEffects() {
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach((cell, index) => {
+            cell.addEventListener('mouseenter', () => {
+                const row = Math.floor(index / 9);
+                const col = index % 9;
+                this.highlightRowAndColumn(row, col);
+            });
+
+            cell.addEventListener('mouseleave', () => {
+                this.clearHighlights();
+            });
+        });
+    }
+
+    highlightRowAndColumn(row, col) {
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach((cell, index) => {
+            const cellRow = Math.floor(index / 9);
+            const cellCol = index % 9;
+            if (cellRow === row || cellCol === col) {
+                cell.classList.add('highlight');
+            }
+        });
+    }
+
+    clearHighlights() {
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach(cell => cell.classList.remove('highlight'));
+    }
+
+    initialize() {
+        this.generateSolution();
+        this.board = this.solution.map(row => [...row]);
+        this.removeNumbers();
+        this.renderBoard();
+        this.startTimer();
+    }
+
+    generateSolution() {
+        const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        
+        const fillCell = (row, col) => {
+            if (col >= 9) {
+                row++;
+                col = 0;
+            }
+            if (row >= 9) return true;
+
+            if (this.solution[row][col] !== 0) {
+                return fillCell(row, col + 1);
+            }
+
+            numbers.sort(() => Math.random() - 0.5);
+
+            for (let num of numbers) {
+                if (this.isValid(row, col, num, this.solution)) {
+                    this.solution[row][col] = num;
+                    if (fillCell(row, col + 1)) return true;
+                    this.solution[row][col] = 0;
+                }
+            }
+            return false;
+        };
+
+        fillCell(0, 0);
+    }
+
+    removeNumbers() {
+        for (let i = 0; i < this.removedCount; i++) {
+            let row, col;
+            do {
+                row = Math.floor(Math.random() * 9);
+                col = Math.floor(Math.random() * 9);
+            } while (this.board[row][col] === 0);
+            this.board[row][col] = 0;
+        }
+    }
+
+    isValid(row, col, num, board) {
+        for (let x = 0; x < 9; x++) {
+            if (board[row][x] === num) return false;
+        }
+
+        for (let x = 0; x < 9; x++) {
+            if (board[x][col] === num) return false;
+        }
+
+        let boxRow = Math.floor(row / 3) * 3;
+        let boxCol = Math.floor(col / 3) * 3;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (board[boxRow + i][boxCol + j] === num) return false;
+            }
+        }
+
+        return true;
+    }
+
+    renderBoard() {
+        const grid = document.querySelector('.grid');
+        grid.innerHTML = `
+            <div class="horizontal-line" style="top: calc(33.33% + 1.2px);"></div>
+            <div class="horizontal-line" style="top: calc(66.66% + 1.2px);"></div>
+        `;
+        
+        for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 9; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                if (this.board[i][j] !== 0) {
+                    cell.textContent = this.board[i][j];
+                    cell.classList.add('fixed');
+                } else {
+                    cell.addEventListener('click', () => this.handleCellClick(i, j, cell));
+                }
+                grid.appendChild(cell);
+            }
+        }
+        this.setupHoverEffects();
+    }
+
+    handleCellClick(row, col, cell) {
+        if (cell.classList.contains('fixed')) return;
+        
+        // Clear existing input if any
+        cell.innerHTML = '';
+        
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.min = '1';
+        input.max = '9';
+        cell.appendChild(input);
+        input.focus();
+
+        const handleInput = (e) => {
+            // Prevent multiple handlers from firing
+            if (input.dataset.processed) return;
+            
+            if (e.key === 'Enter' || e.type === 'blur') {
+                input.dataset.processed = 'true';
+                const num = parseInt(input.value);
+                
+                // Remove event listeners first
+                input.removeEventListener('keypress', handleInput);
+                input.removeEventListener('blur', handleInput);
+                
+                if (num && num >= 1 && num <= 9) {
+                    if (num === this.solution[row][col]) {
+                        this.board[row][col] = num;
+                        // Use textContent instead of innerHTML for simple text updates
+                        cell.textContent = num;
+                        cell.classList.add('fixed');
+                        
+                        if (this.isBoardComplete()) {
+                            clearInterval(this.timer);
+                            this.removedCount++;
+                            document.querySelector('.next-round').classList.add('visible');
+                        }
+                    } else {
+                        this.gameOver();
+                    }
+                } else {
+                    cell.textContent = '';
+                }
+            }
+        };
+
+        input.addEventListener('keypress', handleInput);
+        input.addEventListener('blur', handleInput);
+    }
+
+    nextRound() {
+        document.querySelector('.next-round').classList.remove('visible');
+        this.round++; // Increment round
+        this.updateRoundDisplay(); // Update display
+        this.resetGame();
+    }
+
+    isBoardComplete() {
+        return this.board.every((row, i) => 
+            row.every((cell, j) => cell === this.solution[i][j])
+        );
+    }
+
+    startTimer() {
+        this.timeLeft = 30.0;
+        if (this.timer) clearInterval(this.timer);
+        
+        const timerDisplay = document.querySelector('.timer');
+        this.timer = setInterval(() => {
+            this.timeLeft = Math.max(0, this.timeLeft - 0.1);
+            timerDisplay.textContent = this.timeLeft.toFixed(1);
+            
+            if (this.timeLeft <= 0) {
+                this.gameOver();
+            }
+        }, 100);  // Update every 0.1 seconds
+    }
+
+    gameOver() {
+        clearInterval(this.timer);
+        document.querySelector('.game-over').classList.add('visible');
+    }
+
+    resetGame() {
+        this.board = Array(9).fill().map(() => Array(9).fill(0));
+        this.solution = Array(9).fill().map(() => Array(9).fill(0));
+        this.initialize();
+    }
+}
+
+let game;
+
+function startNewGame() {
+    document.querySelector('.game-over').classList.remove('visible');
+    document.querySelector('.next-round').classList.remove('visible');
+    game = new SudokuGame();
+}
+
+startNewGame();
+</script>
+</body></html>

@@ -1,0 +1,720 @@
+<html><head><base href="." />
+<meta charset="UTF-8">
+<title>Sudoku Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+    --background: #1a1a1a;
+    --surface: #2d2d2d;
+    --primary: #6e8fff;
+    --error: #ff6e6e;
+    --text: #ffffff;
+    --text-secondary: #b0b0b0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Work Sans', sans-serif;
+}
+
+body {
+    background-color: var(--background);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2.66rem; /* Increased from 2rem */
+}
+
+#welcome-content {
+    text-align: center;
+    margin-bottom: 2.66rem;
+}
+
+#welcome-content h1 {
+    font-size: 4rem;
+    color: var(--primary);
+    margin-bottom: 1.33rem;
+}
+
+#welcome-content p {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto 1.33rem;
+}
+
+/* Hide grid and controls initially */
+#grid, #controls, #game-info, #number-counts {
+    display: none;
+}
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.33rem; /* Increased from 1rem */
+    align-items: center;
+}
+
+#difficulty-buttons {
+    display: flex;
+    gap: 1.33rem; /* Increased from 1rem */
+    margin-bottom: 1.33rem; /* Increased from 1rem */
+}
+
+.button {
+    background-color: var(--surface);
+    color: var(--text);
+    border: none;
+    padding: 0.66rem 1.33rem; /* Increased from 0.5rem 1rem */
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.button:hover {
+    background-color: var(--primary);
+}
+
+.button.active {
+    background-color: var(--primary);
+}
+
+#grid {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 3px; /* Increased from 2px */
+    background-color: var(--text-secondary); /* Lighter color for regular grid lines */
+    padding: 5px; /* Increased from 4px */
+    border-radius: 8px;
+    position: relative; /* Keep this */
+}
+
+/* Fix the cell borders */
+.cell:nth-child(9n+3),
+.cell:nth-child(9n+6) {
+    border-right: 3px solid var(--text) !important;
+}
+
+.cell:nth-child(n+19):nth-child(-n+27),
+.cell:nth-child(n+46):nth-child(-n+54) {
+    border-bottom: 3px solid var(--text) !important;
+}
+
+/* Add borders for 3x3 sections */
+.cell:nth-child(9n+1),
+.cell:nth-child(9n+2),
+.cell:nth-child(9n+3),
+.cell:nth-child(9n+4),
+.cell:nth-child(9n+5),
+.cell:nth-child(9n+6),
+.cell:nth-child(9n+7),
+.cell:nth-child(9n+8),
+.cell:nth-child(9n+9) {
+    border-right: 1px solid var(--surface);
+}
+
+/* Add thicker borders for 3x3 grid separation */
+.cell:nth-child(9n+3),
+.cell:nth-child(9n+6) {
+    border-right: 2px solid var(--text) !important; /* Brighter color for 3x3 separators */
+}
+
+.cell:nth-child(n+19):nth-child(-n+27),
+.cell:nth-child(n+46):nth-child(-n+54) {
+    border-bottom: 2px solid var(--text) !important; /* Brighter color for 3x3 separators */
+}
+
+.cell {
+    width: 66px;  /* Increased from 50px */
+    height: 66px; /* Increased from 50px */
+    background-color: var(--background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.cell input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: 2rem;  /* Increased from 1.5rem */
+    color: inherit;
+    cursor: pointer;
+    outline: none;
+}
+
+.cell input::-webkit-outer-spin-button,
+.cell input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.cell input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.cell.given input {
+    color: var(--text-secondary);
+}
+
+.cell:not(.given) input {
+    color: var(--primary);
+}
+
+.cell.highlight {
+    background-color: #3a3a3a;
+}
+
+.cell.highlight-same-number {
+    background-color: #4a4a4a;
+}
+
+.cell.selected {
+    background-color: var(--primary);
+    color: var(--background);
+}
+
+.cell.red { background-color: rgba(255, 110, 110, 0.3); }
+.cell.blue { background-color: rgba(110, 143, 255, 0.3); }
+.cell.green { background-color: rgba(110, 255, 141, 0.3); }
+.cell.yellow { background-color: rgba(255, 240, 110, 0.3); }
+
+#controls {
+    display: flex;
+    gap: 1.33rem; /* Increased from 1rem */
+    margin-top: 1.33rem; /* Increased from 1rem */
+}
+
+#game-info {
+    margin-top: 1.33rem; /* Increased from 1rem */
+    text-align: center;
+}
+
+#completion-screen {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--surface);
+    padding: 2.66rem; /* Increased from 2rem */
+    border-radius: 8px;
+    text-align: center;
+    display: none;
+}
+
+#completion-screen .button {
+    background-color: var(--primary);
+}
+
+#completion-screen .button:hover {
+    background-color: var(--primary);
+    opacity: 0.9;
+}
+
+#number-counts {
+    position: fixed;
+    right: 2.66rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--surface);
+    padding: 1.33rem;
+    border-radius: 8px;
+    display: none; /* Initially hidden */
+}
+
+.number-count {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.5rem 0;
+    font-size: 1.2rem;
+}
+
+.number-count span:first-child {
+    color: var(--primary);
+    margin-right: 1.33rem;
+}
+
+.number-count span:last-child {
+    color: var(--text-secondary);
+}
+
+/* Update drawing overlay CSS */
+#drawing-overlay {
+    position: fixed;
+    top: 0;         /* Add this */
+    left: 0;        /* Add this */
+    width: 100vw;   /* Changed to viewport width */
+    height: 100vh;  /* Changed to viewport height */
+    pointer-events: none;
+    z-index: 1000; /* Increase z-index to ensure it's above everything */
+}
+
+#drawing-tools {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1.33rem;
+}
+
+.draw-tool {
+    width: 40px;
+    height: 40px;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.draw-tool.active {
+    background-color: var(--primary);
+}
+</style>
+</head>
+<body>
+<div id="welcome-content">
+    <h1>Sudoku</h1>
+    <p>Select a difficulty to begin. Fill in the grid so that every row, column, and 3x3 box contains the numbers 1-9. Given numbers cannot be changed.</p>
+    <p>Hover over cells to highlight related positions. Use numbers 1-9 to fill cells. Click the Solve button when finished to reveal the solution.</p>
+    <p>Left click to select tiles, type to place number. Right click to draw, select colors and eraser on the right.</p>
+</div>
+<div id="game-container">
+    <div id="difficulty-buttons">
+        <button class="button" onclick="startGame('easy')">Easy</button>
+        <button class="button" onclick="startGame('medium')">Medium</button>
+        <button class="button" onclick="startGame('hard')">Hard</button>
+    </div>
+    <div id="grid" style="display: none;">
+    </div>
+    <div id="drawing-overlay"></div>
+    <div id="controls">
+        <button class="button" id="solve-button" onclick="solveBoard()" style="display: none;">Solve</button>
+    </div>
+    <div id="game-info">
+        Time: <span id="timer">00:00</span>
+    </div>
+</div>
+
+<div id="number-counts">
+    <div id="drawing-tools">
+        <button class="button draw-tool" data-color="blue">🔵</button>
+        <button class="button draw-tool" data-color="green">🟢</button>
+        <button class="button draw-tool" data-eraser="true">⌫</button>
+    </div>
+    <div class="number-count"><span>1:</span> <span id="count-1">9</span></div>
+    <div class="number-count"><span>2:</span> <span id="count-2">9</span></div>
+    <div class="number-count"><span>3:</span> <span id="count-3">9</span></div>
+    <div class="number-count"><span>4:</span> <span id="count-4">9</span></div>
+    <div class="number-count"><span>5:</span> <span id="count-5">9</span></div>
+    <div class="number-count"><span>6:</span> <span id="count-6">9</span></div>
+    <div class="number-count"><span>7:</span> <span id="count-7">9</span></div>
+    <div class="number-count"><span>8:</span> <span id="count-8">9</span></div>
+    <div class="number-count"><span>9:</span> <span id="count-9">9</span></div>
+</div>
+
+<div id="completion-screen">
+    <h2>Puzzle Complete!</h2>
+    <p>Difficulty: <span id="final-difficulty"></span></p>
+    <p>Time: <span id="final-time"></span></p>
+    <p>Mistakes: <span id="final-mistakes"></span></p>
+    <button class="button" onclick="location.reload()">Play Again</button>
+</div>
+
+<script>
+let gameBoard = Array(9).fill().map(() => Array(9).fill(0));
+let solution = Array(9).fill().map(() => Array(9).fill(0));
+let initialBoard = Array(9).fill().map(() => Array(9).fill(0));
+let selectedCell = null;
+let startTime = null;
+let timer = null;
+let mistakes = 0;
+let currentDifficulty = '';
+let isRightMouseDown = false;
+let currentDrawColor = 'rgba(110, 143, 255, 0.2)'; // Default blue
+let isEraser = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const drawingTools = document.querySelectorAll('.draw-tool');
+    drawingTools.forEach(tool => {
+        tool.addEventListener('click', (e) => {
+            drawingTools.forEach(t => t.classList.remove('active'));
+            tool.classList.add('active');
+            
+            if (tool.dataset.eraser) {
+                isEraser = true;
+            } else {
+                isEraser = false;
+                currentDrawColor = tool.dataset.color === 'blue' ? 
+                    'rgba(110, 143, 255, 0.2)' : 
+                    'rgba(110, 255, 141, 0.2)';
+            }
+        });
+    });
+});
+
+function isValid(board, row, col, num) {
+    // Check row
+    for(let x = 0; x < 9; x++) {
+        if(board[row][x] === num) return false;
+    }
+    
+    // Check column
+    for(let x = 0; x < 9; x++) {
+        if(board[x][col] === num) return false;
+    }
+    
+    // Check 3x3 box
+    let startRow = row - row % 3,
+        startCol = col - col % 3;
+    for(let i = 0; i < 3; i++) {
+        for(let j = 0; j < 3; j++) {
+            if(board[i + startRow][j + startCol] === num) return false;
+        }
+    }
+    
+    return true;
+}
+
+function solveSudoku(board) {
+    let row = 0, col = 0, empty = false;
+    
+    // Find empty position
+    for(let i = 0; i < 9; i++) {
+        for(let j = 0; j < 9; j++) {
+            if(board[i][j] === 0) {
+                row = i;
+                col = j;
+                empty = true;
+                break;
+            }
+        }
+        if(empty) break;
+    }
+    
+    // If no empty position found, puzzle is solved
+    if(!empty) return true;
+    
+    // Try digits 1-9
+    for(let num = 1; num <= 9; num++) {
+        if(isValid(board, row, col, num)) {
+            board[row][col] = num;
+            if(solveSudoku(board)) return true;
+            board[row][col] = 0;
+        }
+    }
+    
+    return false;
+}
+
+function generateValidSudoku() {
+    let board = Array(9).fill().map(() => Array(9).fill(0));
+    
+    // Fill in a few random numbers to start
+    for(let i = 0; i < 20; i++) {
+        let row = Math.floor(Math.random() * 9);
+        let col = Math.floor(Math.random() * 9);
+        let num = Math.floor(Math.random() * 9) + 1;
+        
+        if(board[row][col] === 0 && isValid(board, row, col, num)) {
+            board[row][col] = num;
+        }
+    }
+    
+    // Solve the rest of the puzzle
+    solveSudoku(board);
+    return board;
+}
+
+function generatePuzzle(difficulty) {
+    // Generate a new random solution
+    solution = generateValidSudoku();
+    
+    let removals = {
+        'easy': 30,
+        'medium': 40,
+        'hard': 50
+    }[difficulty];
+
+    gameBoard = JSON.parse(JSON.stringify(solution));
+    let positions = Array.from({length: 81}, (_, i) => i);
+    
+    for(let i = 0; i < removals; i++) {
+        let index = Math.floor(Math.random() * positions.length);
+        let pos = positions.splice(index, 1)[0];
+        let row = Math.floor(pos / 9);
+        let col = pos % 9;
+        gameBoard[row][col] = 0;
+    }
+
+    initialBoard = JSON.parse(JSON.stringify(gameBoard));
+}
+
+function isBoardFull() {
+    return gameBoard.every(row => row.every(cell => cell !== 0));
+}
+
+function startGame(difficulty) {
+    currentDifficulty = difficulty;
+    const grid = document.getElementById('grid');
+    
+    // Hide welcome content and show game elements
+    document.getElementById('welcome-content').style.display = 'none';
+    document.getElementById('difficulty-buttons').style.display = 'none';
+    grid.style.display = 'grid';
+    document.getElementById('controls').style.display = 'flex';
+    document.getElementById('game-info').style.display = 'block';
+    document.getElementById('number-counts').style.display = 'block'; // Show number counts
+    
+    generatePuzzle(difficulty);
+    renderBoard();
+    updateNumberCounts(); // Initial count update
+    startTime = Date.now();
+    timer = setInterval(updateTimer, 1000);
+}
+
+function renderBoard() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = ''; // Remove recreation of drawing overlay
+    
+    for(let i = 0; i < 9; i++) {
+        for(let j = 0; j < 9; j++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = 1;
+            input.max = 9;
+            input.maxLength = 1;
+            
+            if(gameBoard[i][j] !== 0) {
+                input.value = gameBoard[i][j];
+                if(initialBoard[i][j] !== 0) {
+                    cell.classList.add('given');
+                    input.disabled = true;
+                }
+            }
+            
+            cell.dataset.row = i;
+            cell.dataset.col = j;
+            input.dataset.row = i;
+            input.dataset.col = j;
+            
+            input.addEventListener('input', handleInput);
+            input.addEventListener('mouseenter', handleHover);
+            input.addEventListener('mouseleave', removeHighlights);
+            input.addEventListener('mousedown', (e) => {
+                // Only handle left clicks
+                if (e.button === 0) {
+                    e.stopPropagation(); // Prevent drawing overlay from interfering
+                }
+            });
+            
+            cell.appendChild(input);
+            grid.appendChild(cell);
+        }
+    }
+}
+
+function updateNumberCounts() {
+    // Initialize counts array with 9 for each number
+    let counts = Array(10).fill(9); // 0-9, we'll ignore index 0
+    
+    // Count occurrences of each number in the game board
+    for(let i = 0; i < 9; i++) {
+        for(let j = 0; j < 9; j++) {
+            if(gameBoard[i][j] !== 0) {
+                counts[gameBoard[i][j]]--;
+            }
+        }
+    }
+    
+    // Update the display
+    for(let i = 1; i <= 9; i++) {
+        document.getElementById(`count-${i}`).textContent = counts[i];
+    }
+}
+
+// Modify handleInput function to remove action history tracking
+function handleInput(e) {
+    const row = parseInt(e.target.dataset.row);
+    const col = parseInt(e.target.dataset.col);
+    const value = e.target.value;
+    
+    if(value && /^[1-9]$/.test(value)) {
+        gameBoard[row][col] = parseInt(value);
+        updateNumberCounts(); // Update counts after each move
+        
+        // Show/hide solve button based on board completion
+        document.getElementById('solve-button').style.display = isBoardFull() ? 'block' : 'none';
+        
+        // Check completion after each move
+        checkGameCompletion();
+    } else {
+        e.target.value = '';
+        gameBoard[row][col] = 0;
+        updateNumberCounts(); // Update counts when cell is cleared
+        document.getElementById('solve-button').style.display = 'none';
+    }
+}
+
+function checkGameCompletion() {
+    let isFull = gameBoard.every(row => row.every(cell => cell !== 0));
+    if (isFull && gameBoard.every((row, i) => row.every((cell, j) => cell === solution[i][j]))) {
+        showCompletionScreen();
+    }
+}
+
+function handleHover(e) {
+    removeHighlights();
+    
+    const row = parseInt(e.target.dataset.row);
+    const col = parseInt(e.target.dataset.col);
+    const value = gameBoard[row][col];
+    
+    // Get all cells
+    const cells = document.querySelectorAll('.cell');
+    
+    cells.forEach(cell => {
+        const cellRow = parseInt(cell.dataset.row);
+        const cellCol = parseInt(cell.dataset.col);
+        
+        // Highlight same row
+        if(cellRow === row) {
+            cell.classList.add('highlight');
+        }
+        
+        // Highlight same column
+        if(cellCol === col) {
+            cell.classList.add('highlight');
+        }
+        
+        // Highlight same 3x3 box
+        const boxRow = Math.floor(row / 3) * 3;
+        const boxCol = Math.floor(col / 3) * 3;
+        if(cellRow >= boxRow && cellRow < boxRow + 3 && 
+           cellCol >= boxCol && cellCol < boxCol + 3) {
+            cell.classList.add('highlight');
+        }
+        
+        // Highlight same numbers
+        if(value !== 0 && gameBoard[cellRow][cellCol] === value) {
+            cell.classList.add('highlight-same-number');
+        }
+    });
+}
+
+function removeHighlights() {
+    const cells = document.querySelectorAll('.cell');
+    cells.forEach(cell => {
+        cell.classList.remove('highlight', 'highlight-same-number');
+    });
+}
+
+function solveBoard() {
+    // Count mistakes before revealing solution
+    mistakes = 0;
+    for(let i = 0; i < 9; i++) {
+        for(let j = 0; j < 9; j++) {
+            // Only count non-empty cells that differ from solution
+            if(gameBoard[i][j] !== 0 && gameBoard[i][j] !== solution[i][j]) {
+                mistakes++;
+            }
+        }
+    }
+    
+    gameBoard = JSON.parse(JSON.stringify(solution));
+    renderBoard();
+    showCompletionScreen();
+}
+
+function updateTimer() {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+    const seconds = (elapsed % 60).toString().padStart(2, '0');
+    document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+}
+
+function showCompletionScreen() {
+    clearInterval(timer);
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    
+    document.getElementById('final-difficulty').textContent = currentDifficulty;
+    document.getElementById('final-time').textContent = `${minutes}m ${seconds}s`;
+    document.getElementById('final-mistakes').textContent = mistakes;
+    document.getElementById('completion-screen').style.display = 'block';
+}
+
+// Initialize empty board on load
+renderBoard();
+
+document.addEventListener('mouseup', (e) => {
+    if(e.button === 0) selectedCell = null;
+});
+
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+function createDrawingDot(e) {
+    if (!isRightMouseDown) return;
+    
+    const x = e.clientX + window.scrollX;
+    const y = e.clientY + window.scrollY;
+    
+    if (isEraser) {
+        // Remove dots that are near the cursor
+        const dots = document.getElementById('drawing-overlay').children;
+        const eraseRadius = 20;
+        
+        Array.from(dots).forEach(dot => {
+            const dotX = parseInt(dot.style.left);
+            const dotY = parseInt(dot.style.top);
+            const distance = Math.sqrt(Math.pow(x - dotX, 2) + Math.pow(y - dotY, 2));
+            
+            if (distance < eraseRadius) {
+                dot.remove();
+            }
+        });
+    } else {
+        const dot = document.createElement('div');
+        dot.style.position = 'absolute';
+        dot.style.width = '10px';
+        dot.style.height = '10px';
+        dot.style.borderRadius = '50%';
+        dot.style.backgroundColor = currentDrawColor;
+        dot.style.left = (x - 5) + 'px';
+        dot.style.top = (y - 5) + 'px';
+        dot.style.pointerEvents = 'none';
+        
+        document.getElementById('drawing-overlay').appendChild(dot);
+    }
+}
+
+// Move event listener from grid to document
+document.addEventListener('mousedown', (e) => {
+    if (e.button === 2) {
+        isRightMouseDown = true;
+        e.preventDefault();
+    }
+});
+
+document.addEventListener('mouseup', (e) => {
+    if (e.button === 2) {
+        isRightMouseDown = false;
+    }
+});
+
+document.addEventListener('mousemove', createDrawingDot);
+</script>
+</body></html>
