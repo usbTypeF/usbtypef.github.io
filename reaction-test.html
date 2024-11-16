@@ -1,0 +1,209 @@
+<html><head><base href="." />
+<title>Precise Reaction Time Test (Frame Corrected)</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Arial', sans-serif;
+    transition: background-color 0ms;
+    background-color: #ff0000;
+    color: white;
+    user-select: none;
+  }
+
+  #instructions, #results {
+    background-color: rgba(128, 128, 128, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  }
+
+  #instructions {
+    position: fixed;
+    top: 20px;
+    text-align: center;
+    font-size: 1.2em;
+  }
+
+  #results {
+    position: fixed;
+    bottom: 20px;
+    text-align: center;
+    font-size: 1.2em;
+  }
+
+  #history {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(128, 128, 128, 0.3);
+    padding: 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  h1 {
+    position: fixed;
+    top: 20px;
+    text-align: center;
+    font-size: 2em;
+    z-index: 100;
+  }
+
+  #instructions {
+    margin-top: 60px;
+  }
+
+  .history-item {
+    margin: 5px 0;
+    font-size: 1.1em;
+  }
+
+  .early {
+    color: #ff0000;
+  }
+
+  .waiting {
+    background-color: #ff0000 !important;
+  }
+
+  .ready {
+    background-color: #00ff00 !important;
+  }
+
+  .early-bg {
+    background-color: #0000ff !important;
+  }
+</style>
+</head>
+<body>
+<h1>Reaction Time Test</h1>
+<div id="instructions">Click anywhere to begin!</div>
+<div id="results"></div>
+<div id="history">
+    <h3>History</h3>
+    <div id="history-list"></div>
+</div>
+
+<script>
+let waitingForClick = false;
+let startTime = 0;
+let refreshRate = 60; // Default value before detection
+let results = [];
+let gameStarted = false;
+let testTimeout;
+
+async function getRefreshRate() {
+    return new Promise(resolve => {
+        requestAnimationFrame(t1 => {
+            requestAnimationFrame(t2 => {
+                refreshRate = Math.round(1000 / (t2 - t1));
+                resolve(refreshRate);
+            });
+        });
+    });
+}
+
+function getFrameTime() {
+    return 1000 / refreshRate;
+}
+
+function updateHistory() {
+    const historyList = document.getElementById('history-list');
+    historyList.innerHTML = results.map((result, index) => {
+        if (result.early) {
+            return `<div class="history-item early">Attempt ${index + 1}: Too Early!</div>`;
+        }
+        return `<div class="history-item">Attempt ${index + 1}: ${result.time.toFixed(1)}ms</div>`;
+    }).join('');
+}
+
+async function initialize() {
+    await getRefreshRate();
+    document.getElementById('instructions').innerHTML = 
+        `Click when the screen turns green!<br>Display refresh rate: ${refreshRate}Hz<br>Frame correction: ${(2000/refreshRate).toFixed(1)}ms`;
+    gameStarted = true;
+    startTest();
+}
+
+function startTest() {
+    document.body.className = 'waiting';
+    waitingForClick = false;
+    
+    // Random delay between 3000ms (3 seconds) and 10000ms (10 seconds)
+    const delay = 3000 + Math.random() * 7000;
+    
+    if (testTimeout) {
+        clearTimeout(testTimeout);
+    }
+    
+    testTimeout = setTimeout(() => {
+        document.body.className = 'ready';
+        startTime = performance.now();
+        waitingForClick = true;
+    }, delay);
+}
+
+function handleClick() {
+    if (!waitingForClick) {
+        document.body.className = 'early-bg';
+        document.getElementById('results').textContent = 'Too early! Click to try again.';
+        results.push({ early: true });
+        updateHistory();
+        if (testTimeout) {
+            clearTimeout(testTimeout);
+        }
+        return;
+    }
+
+    if (waitingForClick) {
+        const endTime = performance.now();
+        let reactionTime = endTime - startTime;
+        
+        const frameCorrection = (2000 / refreshRate);
+        const correctedTime = Math.max(0, reactionTime - frameCorrection - 4); // Added extra 4ms subtraction
+        
+        results.push({ early: false, time: correctedTime });
+        updateHistory();
+        
+        const recent = results.filter(r => !r.early).slice(-5).map(r => r.time);
+        const average = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : 0;
+        
+        document.getElementById('results').innerHTML = 
+            `Raw time: ${reactionTime.toFixed(1)}ms<br>` +
+            `Frame correction: ${frameCorrection.toFixed(1)}ms + 4ms<br>` +
+            `Final time: ${correctedTime.toFixed(1)}ms<br>` +
+            `Average (last 5 valid): ${average.toFixed(1)}ms<br>` +
+            `Click to try again!`;
+        
+        waitingForClick = false;
+        return;
+    }
+}
+
+document.body.addEventListener('mousedown', function() {
+    if (!gameStarted) {
+        initialize();
+        return;
+    }
+    
+    if (!waitingForClick && document.body.className !== 'waiting') {
+        startTest();
+    } else {
+        handleClick();
+    }
+});
+
+</script>
+</body></html>
