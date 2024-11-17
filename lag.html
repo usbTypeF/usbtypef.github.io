@@ -1,0 +1,174 @@
+<html><head><base href="." /><style>
+:root {
+  --dark-bg: #121212;
+  --darker-bg: #0a0a0a;
+  --light-blue: #64b5f6;
+  --lighter-blue: #90caf9;
+  --text: #e0e0e0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background-color: var(--dark-bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.game-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+.hollow-line {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 100vh;
+  border: 2px solid var(--light-blue);
+  background: transparent;
+}
+
+.moving-line {
+  position: absolute;
+  width: 4px;
+  height: 100vh;
+  background-color: var(--light-blue);
+  opacity: 0.8;
+  top: 0;
+}
+
+.score-display {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background-color: var(--darker-bg);
+  padding: 1rem;
+  border-radius: 8px;
+  z-index: 100;
+}
+
+.click-instructions {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  transform: translateY(100%);
+  background-color: var(--darker-bg);
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: left;
+}
+</style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="hollow-line"></div>
+  </div>
+  <div class="score-display">
+    Average reaction time: <span id="score">Waiting for 10 attempts...</span>
+  </div>
+  <div class="click-instructions">
+    Click when the line aligns with the center line!
+  </div>
+
+  <script>
+    const gameContainer = document.querySelector('.game-container');
+    const scoreDisplay = document.querySelector('#score');
+    let lineAlignmentTime = 0;
+    let isAligned = false;
+    let currentLine = null;
+    let attempts = 0;
+    let reactionTimes = [];
+    let gameActive = false;
+
+    function createLine() {
+      if (gameActive) return;
+      gameActive = true;
+      
+      if (currentLine) {
+        currentLine.remove();
+      }
+
+      const line = document.createElement('div');
+      line.className = 'moving-line';
+      
+      // Randomly choose left or right side
+      const startFromLeft = Math.random() < 0.5;
+      const startX = startFromLeft ? -10 : 110;
+      const endX = startFromLeft ? 110 : -10;
+      
+      line.style.left = `${startX}vw`;
+      
+      gameContainer.appendChild(line);
+      currentLine = line;
+      
+      const animation = line.animate([
+        { left: `${startX}vw` },
+        { left: '50%', transform: 'translateX(-50%)' },
+        { left: `${endX}vw` }
+      ], {
+        duration: 2000,
+        easing: 'linear',
+        fill: 'forwards'
+      });
+
+      setTimeout(() => {
+        isAligned = true;
+        lineAlignmentTime = performance.now();
+        setTimeout(() => {
+          isAligned = false;
+        }, 100);
+      }, 1000);
+
+      animation.onfinish = () => {
+        line.remove();
+        gameActive = false;
+        if (attempts < 10) {
+          setTimeout(createLine, 500);
+        }
+      };
+    }
+
+    function calculateAverage(times) {
+      return Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+    }
+
+    document.addEventListener('mousedown', () => {
+      if (gameActive && attempts < 10) {
+        attempts++;
+        
+        if (isAligned) {
+          const reactionTime = Math.round((performance.now() - lineAlignmentTime) * 1000);
+          reactionTimes.push(reactionTime);
+        } else {
+          reactionTimes.push(10000); // Penalty for early/late clicks - 10ms
+        }
+        
+        if (currentLine) {
+          currentLine.remove();
+          gameActive = false;
+        }
+
+        if (attempts < 10) {
+          setTimeout(createLine, 1000);
+        } else {
+          const averageTime = calculateAverage(reactionTimes);
+          scoreDisplay.textContent = `${averageTime} microseconds`;
+        }
+      }
+    });
+
+    // Start the game
+    createLine();
+  </script>
+</body></html>
