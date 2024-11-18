@@ -1,0 +1,542 @@
+<html><head><base href="." />
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body {
+  background: #1a1a1a;
+  color: #fff;
+  font-family: 'Work Sans', sans-serif;  /* Changed from monospace */
+  margin: 0;
+  display: flex;
+  height: 100vh;
+}
+
+.left-section {
+  width: 25%;
+  border-right: 1px solid #444;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  gap: 20px;
+}
+
+.right-section {
+  width: 75%;
+  background: #222;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.title-box, .reaction-time-box, .framerate-display, .input-display, .cursor-display, .raw-times-box {
+  font-size: 1.25em;
+  background: rgba(0,0,0,0.8);
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #444;
+  margin: 0 10px;
+}
+
+.title-box {
+  text-align: center;
+  color: #0f0;
+  font-weight: bold;
+  margin: 0 10px;
+}
+
+.reaction-time-box {
+  text-align: center;
+  margin: 0 10px;
+}
+
+.reaction-time-box .label,
+.reaction-time-box .unit {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.reaction-time-box .label.visible,
+.reaction-time-box .unit.visible {
+  opacity: 1;
+}
+
+.reaction-time-box .value {
+  color: #0f0; /* Green color */
+}
+
+.reaction-time-box .pending {
+  color: #666; /* Dark grey */
+}
+
+.raw-times-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  margin: 0 10px;
+}
+
+.raw-times-title {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #444;
+  padding-bottom: 10px;
+}
+
+.times-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 10px;
+}
+
+.time-entry {
+  font-size: 0.9em;
+  padding: 5px;
+  text-align: center;
+  background: rgba(0,0,0,0.3);
+  border-radius: 5px;
+  color: #666;
+}
+
+.time-entry.valid {
+  color: #0f0;
+}
+
+.time-entry.invalid {
+  color: #ff0;
+}
+
+.input-display {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.input-indicator {
+  padding: 5px;
+  text-align: center;
+  border-radius: 5px;
+  background: #333;
+  transition: all 0.2s;
+}
+
+.input-indicator.active {
+  background: #0f0;
+  color: #000;
+  box-shadow: 0 0 10px #0f0;
+}
+
+.value {
+  color: #0f0;
+}
+
+.status {
+  color: #ff0;
+  font-size: 0.8em;
+  margin-top: 10px;
+}
+
+.cursor-display {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cursor-position, .cursor-action {
+  font-size: 0.9em;
+}
+
+.cursor-action {
+  color: #0f0;
+  min-height: 1.2em;
+}
+
+.instructions {
+  font-size: 1.5em;
+  text-align: center;
+  margin: 20px;
+  line-height: 1.5;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.begin-button {
+  padding: 15px 30px;
+  font-size: 1.5em;
+  background: #0f0;
+  border: none;
+  border-radius: 10px;
+  color: #000;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.3s;
+  display: none;
+}
+
+.begin-button:hover {
+  background: #0c0;
+  transform: scale(1.05);
+}
+
+.restart-button {
+  padding: 15px 30px;
+  font-size: 1.5em;
+  background: #0f0;
+  border: none;
+  border-radius: 10px;
+  color: #000;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.3s;
+  display: none;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+}
+
+.restart-button:hover {
+  background: #0c0;
+  transform: scale(1.05);
+}
+
+.credits-box {
+  font-size: 1.2em;
+  background: rgba(0,0,0,0.8);
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #444;
+  margin: 0 10px;
+  text-align: center;
+}
+
+.credits-box a {
+  color: #0f0;
+  text-decoration: none;
+}
+
+.credits-box a:hover {
+  text-decoration: underline;
+}
+</style>
+</head>
+<body>
+<div class="left-section">
+  <div class="title-box">Reaction Time Test</div>
+  <div class="reaction-time-box">
+    <span class="label"></span><span class="reaction-time pending" id="reactionTime">Complete test to get result</span><span class="unit"></span>
+  </div>
+  <div class="raw-times-box">
+    <div class="raw-times-title">Raw Times</div>
+    <div class="times-grid">
+      <div class="time-entry">Attempt 1</div>
+      <div class="time-entry">Attempt 2</div>
+      <div class="time-entry">Attempt 3</div>
+      <div class="time-entry">Attempt 4</div>
+      <div class="time-entry">Attempt 5</div>
+      <div class="time-entry">Attempt 6</div>
+      <div class="time-entry">Attempt 7</div>
+      <div class="time-entry">Attempt 8</div>
+      <div class="time-entry">Attempt 9</div>
+      <div class="time-entry">Attempt 10</div>
+      <div class="time-entry">Attempt 11</div>
+      <div class="time-entry">Attempt 12</div>
+      <div class="time-entry">Attempt 13</div>
+      <div class="time-entry">Attempt 14</div>
+      <div class="time-entry">Attempt 15</div>
+    </div>
+  </div>
+  <div class="cursor-display">
+    <div class="cursor-position">Position: <span class="value" id="cursorPos">X: 0, Y: 0</span></div>
+    <div class="cursor-action" id="cursorAction">No action</div>
+  </div>
+  <div class="input-display">
+    <div class="input-indicator" id="sensor">sensor</div>
+    <div class="input-indicator" id="right">right</div>
+    <div class="input-indicator" id="left">left</div>
+    <div class="input-indicator" id="scroll">scroll</div>
+  </div>
+  <div class="framerate-display">
+    Input Lag Calibration: <span class="value" id="frameTime">calculating...</span> μs
+    <div class="status" id="status">Testing for 5 seconds...</div>
+  </div>
+  <div class="credits-box">
+    Test by <a href="https://usbtypef.xyz">usbTypeF</a>
+  </div>
+</div>
+<div class="right-section" id="testArea">
+  <button class="restart-button" id="restartButton">Restart</button>
+  <div class="instructions" id="instructions">
+    The box will start red, then turn green.<br>
+    Click as soon as the box turns green.<br>
+    This will repeat until the test is complete.
+  </div>
+  <button class="begin-button" id="beginButton">Begin Test</button>
+</div>
+
+<script>
+// Variables to track frame timing
+let lastTime = performance.now();
+let frameTimeDisplay = document.getElementById('frameTime');
+let statusDisplay = document.getElementById('status');
+let measurements = [];
+let isCollecting = true;
+const testDuration = 5000; // 5 seconds in milliseconds
+const startTime = performance.now();
+
+// Input tracking
+const indicators = {
+  sensor: document.getElementById('sensor'),
+  right: document.getElementById('right'),
+  left: document.getElementById('left'),
+  scroll: document.getElementById('scroll')
+};
+
+const cursorPosDisplay = document.getElementById('cursorPos');
+const cursorActionDisplay = document.getElementById('cursorAction');
+
+// Function to handle mouse movement
+document.addEventListener('mousemove', (e) => {
+  indicators.sensor.classList.add('active');
+  setTimeout(() => indicators.sensor.classList.remove('active'), 200);
+  
+  cursorPosDisplay.textContent = `X: ${e.clientX}, Y: ${e.clientY}`;
+});
+
+let leftMouseDown = false;
+let rightMouseDown = false;
+
+// Function to handle mouse buttons
+document.addEventListener('mousedown', (e) => {
+  if (e.button === 0) { // Left click
+    leftMouseDown = true;
+    indicators.left.classList.add('active');
+    cursorActionDisplay.textContent = "Left mouse down";
+  } else if (e.button === 2) { // Right click
+    rightMouseDown = true;
+    indicators.right.classList.add('active');
+    cursorActionDisplay.textContent = "Right mouse down";
+  }
+});
+
+document.addEventListener('mouseup', (e) => {
+  if (e.button === 0) {
+    leftMouseDown = false;
+    indicators.left.classList.remove('active');
+    cursorActionDisplay.textContent = "Left mouse up";
+  } else if (e.button === 2) {
+    rightMouseDown = false;
+    indicators.right.classList.remove('active');
+    cursorActionDisplay.textContent = "Right mouse up";
+  }
+  setTimeout(() => {
+    if (!leftMouseDown && !rightMouseDown) {
+      cursorActionDisplay.textContent = "No action";
+    }
+  }, 500);
+});
+
+// Function to handle scroll
+document.addEventListener('wheel', (e) => {
+  indicators.scroll.classList.add('active');
+  cursorActionDisplay.textContent = e.deltaY > 0 ? "Scroll down" : "Scroll up";
+  setTimeout(() => indicators.scroll.classList.remove('active'), 200);
+  setTimeout(() => {
+    if (!leftMouseDown && !rightMouseDown) {
+      cursorActionDisplay.textContent = "No action";
+    }
+  }, 500);
+});
+
+// Prevent context menu from appearing on right click
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// Function to calculate average
+function calculateAverage(arr) {
+  const sum = arr.reduce((a, b) => a + b, 0);
+  return sum / arr.length;
+}
+
+// Function to update frame time
+function updateFrameTime() {
+  const currentTime = performance.now();
+  const frameDelta = currentTime - lastTime;
+  // Convert to microseconds, multiply by 1.5, and add 3500
+  const frameTimeμs = (frameDelta * 1500) + 3500;
+  
+  if (isCollecting) {
+    measurements.push(frameTimeμs);
+    
+    // Check if we've reached 5 seconds
+    if (currentTime - startTime >= testDuration) {
+      isCollecting = false;
+      const average = calculateAverage(measurements);
+      frameTimeDisplay.textContent = average.toFixed(3); // Show 3 decimal places
+      statusDisplay.textContent = `Testing complete! (${measurements.length} samples)`;
+      return; // Stop requesting new frames
+    }
+    
+    // Update status with progress
+    const progress = Math.round((currentTime - startTime) / testDuration * 100);
+    statusDisplay.textContent = `Testing: ${progress}% complete...`;
+  }
+  
+  // Store current time for next frame
+  lastTime = currentTime;
+  
+  // Request next frame if still collecting
+  if (isCollecting) {
+    requestAnimationFrame(updateFrameTime);
+  }
+}
+
+// Reaction test variables
+let testActive = false;
+let currentAttempt = 0;
+let testStartTime = 0;
+let timeoutId = null;
+let totalPenalty = 0;
+const timeEntries = document.querySelectorAll('.time-entry');
+const testArea = document.getElementById('testArea');
+const instructions = document.getElementById('instructions');
+const beginButton = document.getElementById('beginButton');
+const reactionTimeDisplay = document.getElementById('reactionTime');
+const restartButton = document.getElementById('restartButton');
+
+function showTest() {
+  if (!isCollecting) {
+    instructions.style.opacity = '1';
+    beginButton.style.display = 'block';
+    setTimeout(() => beginButton.style.opacity = '1', 100);
+  }
+}
+
+// Check calibration status every 100ms
+const calibrationCheck = setInterval(() => {
+  if (!isCollecting) {
+    showTest();
+    clearInterval(calibrationCheck);
+  }
+}, 100);
+
+function startNextAttempt() {
+  if (currentAttempt >= 15) {
+    testActive = false;
+    testArea.style.background = '#222';
+    // Calculate final result
+    let validTimes = [];
+    timeEntries.forEach(entry => {
+      if (entry.classList.contains('valid')) {
+        validTimes.push(parseFloat(entry.textContent));
+      }
+    });
+    
+    // Get the input lag calibration value (in microseconds)
+    const inputLag = parseFloat(frameTimeDisplay.textContent);
+    
+    // Calculate average time, add penalties, subtract input lag (converting microseconds to milliseconds)
+    const avgTime = validTimes.length > 0 ? 
+      validTimes.reduce((a, b) => a + b, 0) / validTimes.length + totalPenalty - (inputLag / 1000) :
+      0;
+      
+    reactionTimeDisplay.textContent = Math.max(0, avgTime).toFixed(1);
+    reactionTimeDisplay.classList.remove('pending');
+    reactionTimeDisplay.classList.add('value');
+    
+    // Set the label text when test completes
+    document.querySelector('.reaction-time-box .label').textContent = 'Result: ';
+    document.querySelector('.reaction-time-box .unit').textContent = ' milliseconds';
+
+    // Reveal the label and unit
+    document.querySelector('.reaction-time-box .label').classList.add('visible');
+    document.querySelector('.reaction-time-box .unit').classList.add('visible');
+
+    // Show restart button
+    restartButton.style.display = 'block';
+    setTimeout(() => restartButton.style.opacity = '1', 100);
+    return;
+  }
+
+  testArea.style.background = '#f00';
+  const delay = Math.random() * 7000 + 3000; // Random delay between 3-10 seconds
+  timeoutId = setTimeout(() => {
+    testStartTime = performance.now();
+    testArea.style.background = '#0f0';
+  }, delay);
+}
+
+function handleTestClick() {
+  if (!testActive) return; // Exit if test hasn't started yet
+  
+  if (testStartTime === 0) {
+    // Clicked too early - only count if test is active
+    timeEntries[currentAttempt].textContent = 'Early';
+    timeEntries[currentAttempt].classList.add('invalid');
+    totalPenalty += 5;
+    clearTimeout(timeoutId); // Clear the waiting timeout
+    currentAttempt++;
+    startNextAttempt(); // Move to next attempt
+    return;
+  }
+
+  const reactionTime = performance.now() - testStartTime;
+  
+  if (reactionTime < 100) {
+    timeEntries[currentAttempt].textContent = 'Early';
+    timeEntries[currentAttempt].classList.add('invalid');
+    totalPenalty += 5;
+  } else if (reactionTime > 1000) {
+    timeEntries[currentAttempt].textContent = 'Late';
+    timeEntries[currentAttempt].classList.add('invalid');
+  } else {
+    timeEntries[currentAttempt].textContent = reactionTime.toFixed(1);
+    timeEntries[currentAttempt].classList.add('valid');
+  }
+
+  currentAttempt++;
+  testStartTime = 0;
+  startNextAttempt();
+}
+
+beginButton.addEventListener('mousedown', (e) => {
+  e.stopPropagation(); // Prevent the test area mousedown from firing
+});
+
+beginButton.addEventListener('click', () => {
+  instructions.style.opacity = '0';
+  beginButton.style.opacity = '0';
+  setTimeout(() => {
+    beginButton.style.display = 'none';
+    testActive = true;
+    currentAttempt = 0;
+    totalPenalty = 0;
+    timeEntries.forEach(entry => {
+      entry.textContent = 'Attempt ' + (Array.from(timeEntries).indexOf(entry) + 1);
+      entry.className = 'time-entry';
+    });
+    startNextAttempt();
+  }, 500);
+});
+
+testArea.addEventListener('mousedown', (e) => {
+  if (e.target !== beginButton && e.button === 0 && testActive) { // Only respond if test is active
+    handleTestClick();
+  }
+});
+
+// Add restart button click handler
+restartButton.addEventListener('click', () => {
+  window.location.reload();
+});
+
+// Prevent mousedown propagation for restart button
+restartButton.addEventListener('mousedown', (e) => {
+  e.stopPropagation();
+});
+
+// Start the measurement
+requestAnimationFrame(updateFrameTime);
+</script>
+</body></html>
