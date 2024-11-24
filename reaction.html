@@ -4,10 +4,10 @@
 body {
   background: #1a1a1a;
   color: #fff;
-  font-family: 'Work Sans', sans-serif;  /* Changed from monospace */
+  font-family: 'Work Sans', sans-serif;  
   margin: 0;
   display: flex;
-  height: 100vh;
+  flex-direction: row;
 }
 
 .left-section {
@@ -19,14 +19,23 @@ body {
   gap: 20px;
 }
 
-.right-section {
-  width: 75%;
+.center-section {
+  width: 55%; /* Changed from 65% */
   background: #222;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
+}
+
+.right-section {
+  width: 20%; /* Changed from 10% */
+  border-left: 1px solid #444;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  gap: 20px;
 }
 
 .title-box, .reaction-time-box, .framerate-display, .input-display, .cursor-display, .raw-times-box {
@@ -150,7 +159,7 @@ body {
 }
 
 .cursor-action {
-  color: #0f0;
+  color: #ff0;
   min-height: 1.2em;
 }
 
@@ -183,7 +192,7 @@ body {
 
 .restart-button {
   padding: 15px 30px;
-  font-size: 1.5em;
+  font-size: 2em;
   background: #0f0;
   border: none;
   border-radius: 10px;
@@ -193,8 +202,6 @@ body {
   transition: all 0.3s;
   display: none;
   position: absolute;
-  right: 20px;
-  top: 20px;
 }
 
 .restart-button:hover {
@@ -220,63 +227,416 @@ body {
 .credits-box a:hover {
   text-decoration: underline;
 }
+
+.leaderboard-title {
+  font-size: 1.5em;
+  background: rgba(0,0,0,0.8);
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #444;
+  margin: 0 10px;
+  text-align: center;
+  color: #0f0;
+  font-weight: bold;
+}
+
+.score-submit-box {
+  background: rgba(0,0,0,0.8);
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #444;
+  margin: 0 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.score-submit-box input {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #444;
+  background: #333;
+  color: #fff;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 1.5em;
+}
+
+.score-submit-box button {
+  font-size: 1.5em;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  background: #0f0;
+  color: #000;
+  cursor: pointer;
+  font-family: 'Work Sans', sans-serif;
+  transition: all 0.3s;
+}
+
+.score-submit-box button:hover {
+  background: #0c0;
+  transform: scale(1.05);
+}
+
+.leaderboard-box {
+  background: rgba(0,0,0,0.8);
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #444;
+  margin: 0 10px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  font-size: 1.1em; /* Updated the font size */
+}
+
+.scores-list {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.score-entry {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #333;
+  align-items: center;
+}
+
+.score-entry final {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 0px;
+  align-items: center;
+}
+
+.score-left {
+  display: flex;
+  align-items: center;
+}
+
+.rank {
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+.rank-1 {
+  color: #FFD700; /* Gold */
+  font-size: 1.75em;
+}
+
+.user-1 {
+  color: #0F0; /* Yellow */
+  font-size: 1.5em;
+}
+
+.score-1 {
+  color: #FF0; /* Yellow */
+  font-size: 1.5em;
+}
+
+.rank-2 {
+  color: #C0C0C0; /* Silver */
+  font-size: 1.5em;
+}
+
+.user-2 {
+  font-size: 1.375em;
+}
+
+.rank-3 {
+  color: #CD7F32; /* Bronze */
+  font-size: 1.5em;
+}
+
+.user-3 {
+  font-size: 1.25em;
+}
+
+.leaderboard-stats {
+  background: rgba(0,0,0,0.8);
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #444;
+  margin: 0 10px;
+  font-size: 1.25em;
+  color: #888;
+}
+
+.full-leaderboard-box {
+  background: rgba(0,0,0,0.8);
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #444;
+  margin: 10px;
+  text-align: center;
+}
+
+.full-leaderboard-box a {
+  color: #0f0;
+  text-decoration: none;
+}
+
+.full-leaderboard-box a:hover {
+  text-decoration: underline;
+}
 </style>
 </head>
 <body>
-<div class="left-section">
-  <div class="title-box">Reaction Time Test</div>
-  <div class="reaction-time-box">
-    <span class="label"></span><span class="reaction-time pending" id="reactionTime">Complete test to get result</span><span class="unit"></span>
+  <div class="left-section">
+    <div class="title-box">Reaction Time Test</div>
+    <div class="reaction-time-box">
+      <span class="label"></span><span class="reaction-time pending" id="reactionTime">Complete test to get result</span><span class="unit"></span>
   </div>
-  <div class="raw-times-box">
-    <div class="raw-times-title">Raw Times</div>
-    <div class="times-grid">
-      <div class="time-entry">Attempt 1</div>
-      <div class="time-entry">Attempt 2</div>
-      <div class="time-entry">Attempt 3</div>
-      <div class="time-entry">Attempt 4</div>
-      <div class="time-entry">Attempt 5</div>
-      <div class="time-entry">Attempt 6</div>
-      <div class="time-entry">Attempt 7</div>
-      <div class="time-entry">Attempt 8</div>
-      <div class="time-entry">Attempt 9</div>
-      <div class="time-entry">Attempt 10</div>
-      <div class="time-entry">Attempt 11</div>
-      <div class="time-entry">Attempt 12</div>
-      <div class="time-entry">Attempt 13</div>
-      <div class="time-entry">Attempt 14</div>
-      <div class="time-entry">Attempt 15</div>
+    <div class="raw-times-box">
+      <div class="raw-times-title">Raw Times</div>
+      <div class="times-grid">
+        <div class="time-entry">Attempt 1</div>
+        <div class="time-entry">Attempt 2</div>
+        <div class="time-entry">Attempt 3</div>
+        <div class="time-entry">Attempt 4</div>
+        <div class="time-entry">Attempt 5</div>
+        <div class="time-entry">Attempt 6</div>
+        <div class="time-entry">Attempt 7</div>
+        <div class="time-entry">Attempt 8</div>
+        <div class="time-entry">Attempt 9</div>
+        <div class="time-entry">Attempt 10</div>
+        <div class="time-entry">Attempt 11</div>
+        <div class="time-entry">Attempt 12</div>
+        <div class="time-entry">Attempt 13</div>
+        <div class="time-entry">Attempt 14</div>
+        <div class="time-entry">Attempt 15</div>
+      </div>
+    </div>
+    <div class="cursor-display">
+      <div class="cursor-position">Position: <span class="value" id="cursorPos">X: 0, Y: 0</span></div>
+      <div class="cursor-action" id="cursorAction">No action</div>
+    </div>
+    <div class="input-display">
+      <div class="input-indicator" id="sensor">sensor</div>
+      <div class="input-indicator" id="right">right</div>
+      <div class="input-indicator" id="left">left</div>
+      <div class="input-indicator" id="scroll">scroll</div>
+    </div>
+    <div class="framerate-display">
+      Input Lag Calibration: <span class="value" id="frameTime">calculating...</span> μs
+      <div class="status" id="status">Testing for 5 seconds...</div>
+    </div>
+    <div class="credits-box">
+      test by <a href="https://usbtypef.xyz">usbTypeF</a>
     </div>
   </div>
-  <div class="cursor-display">
-    <div class="cursor-position">Position: <span class="value" id="cursorPos">X: 0, Y: 0</span></div>
-    <div class="cursor-action" id="cursorAction">No action</div>
+  <div class="center-section" id="testArea">
+    <button class="restart-button" id="restartButton">Restart</button>
+    <div class="instructions" id="instructions">
+      The box will start red, then turn green.<br>
+      Click as soon as the box turns green.<br>
+      This will repeat until the test is complete.
+    </div>
+    <button class="begin-button" id="beginButton">Begin Test</button>
   </div>
-  <div class="input-display">
-    <div class="input-indicator" id="sensor">sensor</div>
-    <div class="input-indicator" id="right">right</div>
-    <div class="input-indicator" id="left">left</div>
-    <div class="input-indicator" id="scroll">scroll</div>
+  <div class="right-section">
+    <div class="leaderboard-title">Leaderboard</div>
+    <div class="score-submit-box">
+      <input type="text" placeholder="Input username" id="usernameInput">
+      <button id="submitScore">Submit Score</button>
+    </div>
+    <div class="leaderboard-box">
+      <div class="scores-list">
+        <div class="score-entry">
+          <div class="score-left">
+            <span class="rank rank-1">1st</span>
+            <span class="username user-1"></span>
+          </div>
+          <span class="score score-1"></span>
+        </div>
+        <div class="score-entry">
+          <div class="score-left">
+            <span class="rank rank-2">2nd</span>
+            <span class="username user-2"></span>
+          </div>
+          <span class="score user-2"></span>
+        </div>
+        <div class="score-entry">
+          <div class="score-left">
+            <span class="rank rank-3">3rd</span>
+            <span class="username user-3"></span>
+          </div>
+          <span class="score user-3"></span>
+        </div>
+        <div class="score-entry">
+          <div class="score-left">
+            <span class="rank">4th</span>
+            <span class="username"></span>
+          </div>
+          <span class="score"></span>
+        </div>
+        <div class="score-entry">
+          <div class="score-left">
+            <span class="rank">5th</span>
+            <span class="username"></span>
+          </div>
+          <span class="score"></span>
+        </div>
+        <div class="score-entry">
+          <div class="score-left">
+            <span class="rank">6th</span>
+            <span class="username"></span>
+          </div>
+          <span class="score"></span>
+        </div>
+        <div class="score-entry">
+          <div class="score-left">
+            <span class="rank">7th</span>
+            <span class="username"></span>
+          </div>
+          <span class="score"></span>
+        </div>
+        <div class="score-entry">
+          <div class="score-left">
+            <span class="rank">8th</span>
+            <span class="username"></span>
+          </div>
+          <span class="score"></span>
+        </div>
+        <div class="score-entry">
+          <div class="score-left">
+            <span class="rank">9th</span>
+            <span class="username"></span>
+          </div>
+          <span class="score"></span>
+        </div>
+        <div class="score-entry" id="final">
+          <div class="score-left">
+            <span class="rank">10th</span>
+            <span class="username"></span>
+          </div>
+          <span class="score"></span>
+        </div>
+      </div>
+    </div>
+    <div class="leaderboard-stats">
+      <div class="stat-line">Average (all): <span class="value">176.2ms</span></div>
+      <div class="stat-line">Average (top 10): <span class="value">171.1ms</span></div>
+    </div>
+    <div class="credits-box">
+      <a href="https://docs.google.com/spreadsheets/d/18dcRJaQ0QpsemqV5AvWLp2splTQMAQF5pKrVeTXS848/edit?usp=sharing">Full Leaderboard</a>
+    </div>
   </div>
-  <div class="framerate-display">
-    Input Lag Calibration: <span class="value" id="frameTime">calculating...</span> μs
-    <div class="status" id="status">Testing for 5 seconds...</div>
-  </div>
-  <div class="credits-box">
-    Test by <a href="https://usbtypef.xyz">usbTypeF</a>
-  </div>
-</div>
-<div class="right-section" id="testArea">
-  <button class="restart-button" id="restartButton">Restart</button>
-  <div class="instructions" id="instructions">
-    The box will start red, then turn green.<br>
-    Click as soon as the box turns green.<br>
-    This will repeat until the test is complete.
-  </div>
-  <button class="begin-button" id="beginButton">Begin Test</button>
-</div>
 
 <script>
+const apiKey = 'AIzaSyBuzHQQyNiEumr9hGEk8iMESUtsjg9BMKI'; // Replace with your actual API key
+        const spreadsheetId = '18dcRJaQ0QpsemqV5AvWLp2splTQMAQF5pKrVeTXS848'; // Replace with your actual spreadsheet ID
+        const sheetName = 'Sheet1'; // Replace with your sheet name if different
+        const appScriptUrl = 'https://script.google.com/macros/s/AKfycbxqnxGfjLd1NdC29YXN9prrzpAh-LRLZNRqdRgTgVWXC8S87Q3w3wyaXETTAYXQU_XGIw/exec'; // Replace with your Apps Script Web App URL
+
+
+async function updateLeaderboard(data) {
+    // Extract the values from the response
+    const rows = data.values;
+    
+    // Skip header row if it exists and get only scores
+    const startIndex = rows[0][0].toLowerCase() === 'username' ? 1 : 0;
+    
+    // Create array of user objects with username and score
+    let userScores = rows.slice(startIndex).map(row => ({
+        username: row[0],
+        score: parseFloat(row[1])
+    }));
+    
+    // Sort by score (lowest to highest since these are reaction times)
+    userScores.sort((a, b) => a.score - b.score);
+    
+    // Get top 10 users
+    const top10 = userScores.slice(0, 10);
+    
+    // Update the leaderboard DOM
+    const scoreEntries = document.querySelectorAll('.score-entry');
+    top10.forEach((user, index) => {
+        const entry = scoreEntries[index];
+        if (entry) {
+            // Update username
+            entry.querySelector('.username').textContent = user.username;
+            // Update score
+            entry.querySelector('.score').textContent = user.score.toFixed(1);
+        }
+    });
+    
+    // Calculate averages
+    const top10Avg = top10.reduce((sum, user) => sum + user.score, 0) / top10.length;
+    const totalAvg = userScores.reduce((sum, user) => sum + user.score, 0) / userScores.length;
+    
+    // Update stats
+    const statLines = document.querySelectorAll('.stat-line .value');
+    statLines[0].textContent = totalAvg.toFixed(1) + 'ms';
+    statLines[1].textContent = top10Avg.toFixed(1) + 'ms';
+}
+
+async function fetchLeaderboard() {
+    try {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}?key=${apiKey}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.values && data.values.length > 0) {
+            await updateLeaderboard(data);
+        } else {
+            console.error('No data received from Google Sheets');
+        }
+    } catch (error) {
+        console.error('Error fetching leaderboard data:', error);
+    }
+}
+
+async function submitScore(event) {
+    if (event) {
+        event.preventDefault();
+    }
+    
+    // Get the username from the input
+    const username = document.getElementById('usernameInput').value.trim();
+    
+    // Get the score from the reaction time span
+    const score = document.getElementById('reactionTime').textContent;
+    
+    // Validate inputs
+    if (!username) {
+        alert('Please enter a username');
+        return;
+    }
+    
+    if (!score || isNaN(parseFloat(score))) {
+        alert('Invalid score');
+        return;
+    }
+    
+    try {
+        const response = await fetch(appScriptUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: new URLSearchParams({
+                'username': username,
+                'score': score
+            })
+        });
+        
+        // Clear the username input
+        document.getElementById('usernameInput').value = '';
+        
+        // Refresh the leaderboard to show the new score
+        fetchLeaderboard();
+        
+        // Optional: Show success message
+        alert('Score submitted successfully!');
+        
+    } catch (error) {
+        console.error('Error submitting score:', error);
+        alert('Error submitting score. Please try again.');
+    }
+}
+
+fetchLeaderboard();
 // Variables to track frame timing
 let lastTime = performance.now();
 let frameTimeDisplay = document.getElementById('frameTime');
@@ -399,7 +759,6 @@ let testStartTime = 0;
 let timeoutId = null;
 let totalPenalty = 0;
 const timeEntries = document.querySelectorAll('.time-entry');
-const testArea = document.getElementById('testArea');
 const instructions = document.getElementById('instructions');
 const beginButton = document.getElementById('beginButton');
 const reactionTimeDisplay = document.getElementById('reactionTime');
@@ -421,7 +780,10 @@ const calibrationCheck = setInterval(() => {
   }
 }, 100);
 
+
+
 function startNextAttempt() {
+	document.querySelector('.instructions').textContent = '';
   if (currentAttempt >= 15) {
     testActive = false;
     testArea.style.background = '#222';
@@ -456,6 +818,11 @@ function startNextAttempt() {
     // Show restart button
     restartButton.style.display = 'block';
     setTimeout(() => restartButton.style.opacity = '1', 100);
+    
+    // Enable score submission
+    document.getElementById('usernameInput').disabled = false;
+    document.getElementById('submitScore').disabled = false;
+
     return;
   }
 
@@ -535,6 +902,18 @@ restartButton.addEventListener('click', () => {
 restartButton.addEventListener('mousedown', (e) => {
   e.stopPropagation();
 });
+
+// Score submission handling
+const usernameInput = document.getElementById('usernameInput');
+const submitScoreButton = document.getElementById('submitScore');
+
+// Initially disable the input and button until test is complete
+usernameInput.disabled = true;
+submitScoreButton.disabled = true;
+
+usernameInput.setAttribute('maxlength', '16');
+
+document.getElementById('submitScore').addEventListener('click', submitScore);
 
 // Start the measurement
 requestAnimationFrame(updateFrameTime);
