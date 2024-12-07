@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Grid Matrix Multiplication Benchmark</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        #results {
+            margin-top: 20px;
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        #benchmarkCanvas {
+            border: 2px solid #333;
+            margin: 20px auto;
+        }
+        #imageUrlInput {
+            width: 400px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Grid Matrix Multiplication Benchmark</h1>
+    <canvas id="benchmarkCanvas" width="512" height="512"></canvas>
+    <div>
+        <button id="startBenchmark">Start Benchmark</button>
+    </div>
+    <div id="results">
+        <p>Paste an image URL and click "Start Benchmark"</p>
+    </div>
+
+    <script>
+        // Get canvas and context
+        const canvas = document.getElementById('benchmarkCanvas');
+        const ctx = canvas.getContext('2d');
+        const imageData = ctx.createImageData(512, 512);
+        const data = imageData.data;
+
+        // Worker code with continuous calculation
+        const workerCode = `
+            function generateMatrix(size) {
+                const matrix = new Float64Array(size * size);
+                for (let i = 0; i < matrix.length; i++) {
+                    matrix[i] = Math.random();
+                }
+                return matrix;
+            }
+
+            function multiplyMatrices(a, b, size) {
+                const result = new Float64Array(size * size);
+                for (let i = 0; i < size; i++) {
+                    for (let j = 0; j < size; j++) {
+                        let sum = 0;
+                        for (let k = 0; k < size; k++) {
+                            sum += a[i * size + k] * b[k * size + j];
+                        }
+                        result[i * size + j] = sum;
+                    }
+                }
+                return result;
+            }
+
+            self.onmessage = function(e) {
+                const { size, workerIndex } = e.data;
+                const matrixA = generateMatrix(size);
+                const matrixB = generateMatrix(size);
+                
+                const start = performance.now();
+                const result = multiplyMatrices(matrixA, matrixB, size);
+                const end = performance.now();
+
+                self.postMessage({
+                    duration: end - start,
+                    workerIndex: workerIndex,
+                    complete: true
+                });
+            };
+        `;
+
+        document.getElementById('startBenchmark').addEventListener('click', async () => {
+            // Get image URL
+            const imageUrl = "my-image.png";
+
+            if (!imageUrl) {
+                alert('Please enter an image URL');
+                return;
+            }
+
+            // Reset canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, 512, 512);
+
+            const resultsDiv = document.getElementById('results');
+            const size = 128; // Fixed 128x128 matrix size
+
+            // Load image
+            const image = new Image();
+            image.crossOrigin = 'Anonymous';
+            
+            image.onerror = () => {
+                alert('Failed to load image. Please check the URL.');
+                return;
+            };
+
+            image.onload = () => {
+                // Create a temporary canvas to get image data
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = 128;
+                tempCanvas.height = 128;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(image, 0, 0, 128, 128);
+                const sourceImageData = tempCtx.getImageData(0, 0, 128, 128);
+
+                // Detect number of cores
+                const numWorkers = navigator.hardwareConcurrency || 4;
+                resultsDiv.innerHTML = `<p>Running benchmark on ${numWorkers} cores...</p>`;
+
+                const workers = [];
+                const workerResults = [];
+                const startTime = performance.now();
+
+                // Create blob for worker
+                const blob = new Blob([workerCode], { type: 'application/javascript' });
+                const workerScript = URL.createObjectURL(blob);
+
+                // Track filled pixels
+                const filledPixels = new Set();
+
+                // Create and start workers
+                for (let i = 0; i < numWorkers; i++) {
+                    const worker = new Worker(workerScript);
+                    workers.push(worker);
+
+                    worker.onmessage = (e) => {
+                        if (e.data.complete) {
+                            workerResults.push(e.data.duration);
+                            
+                            // Select a random unfilled pixel
+                            let pixelIndex;
+                            do {
+                                pixelIndex = Math.floor(Math.random() * 16384);
+                            } while (filledPixels.has(pixelIndex));
+                            
+                            filledPixels.add(pixelIndex);
+
+                            // Calculate x and y coordinates
+                            const px = pixelIndex % 128 * 4;
+                            const py = Math.floor(pixelIndex / 128) * 4;
+
+                            // Get source image pixel
+                            const sourceX = pixelIndex % 128;
+                            const sourceY = Math.floor(pixelIndex / 128);
+                            const sourceIndex = (sourceY * 128 + sourceX) * 4;
+
+                            // Fill 4x4 pixel square
+                            for (let dx = 0; dx < 4; dx++) {
+                                for (let dy = 0; dy < 4; dy++) {
+                                    const destIndex = ((py + dy) * 512 + (px + dx)) * 4;
+                                    data[destIndex] = sourceImageData.data[sourceIndex];     // Red
+                                    data[destIndex + 1] = sourceImageData.data[sourceIndex + 1]; // Green
+                                    data[destIndex + 2] = sourceImageData.data[sourceIndex + 2]; // Blue
+                                    data[destIndex + 3] = sourceImageData.data[sourceIndex + 3]; // Alpha
+                                }
+                            }
+
+                            // Update canvas
+                            ctx.putImageData(imageData, 0, 0);
+
+                            // Check if all pixels are filled
+                            if (filledPixels.size === 16384) {
+                                const endTime = performance.now();
+                                const totalTime = endTime - startTime;
+
+                                // Calculate worker statistics
+                                const avgWorkerTime = workerResults.reduce((a, b) => a + b, 0) / workerResults.length;
+                                const maxWorkerTime = Math.max(...workerResults);
+
+                                resultsDiv.innerHTML = `
+                                    <h3>Benchmark Results (${size}x${size} Matrix)</h3>
+                                    <p>Number of Cores: ${numWorkers}</p>
+                                    <p>Total Benchmark Time: ${totalTime.toFixed(2)} ms</p>
+                                    <p>Average Worker Time: ${avgWorkerTime.toFixed(2)} ms</p>
+                                    <p>Max Single Worker Time: ${maxWorkerTime.toFixed(2)} ms</p>
+                                    <p>Total Matrices Multiplied: ${workerResults.length}</p>
+                                `;
+
+                                // Cleanup workers
+                                workers.forEach(w => w.terminate());
+                                URL.revokeObjectURL(workerScript);
+                            } else {
+                                // Continue worker calculation
+                                worker.postMessage({ 
+                                    size, 
+                                    workerIndex: e.data.workerIndex
+                                });
+                            }
+                        }
+                    };
+
+                    // Start initial worker
+                    worker.postMessage({ 
+                        size, 
+                        workerIndex: i
+                    });
+                }
+            };
+
+            // Start loading the image
+            image.src = imageUrl;
+        });
+    </script>
+</body>
+</html>
