@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Image Grid Matrix Multiplication Benchmark</title>
+    <title>Multicore Mandelbrot Benchmark</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -189,12 +189,12 @@
                                 const maxWorkerTime = Math.max(...workerResults);
 
                                 resultsDiv.innerHTML = `
-                                    <h3>Benchmark Results (${size}x${size} Matrix)</h3>
+                                    <h3>Benchmark Results (${size}x${size} Mandelbrot)</h3>
                                     <p>Number of Cores: ${numWorkers}</p>
                                     <p>Total Benchmark Time: ${totalTime.toFixed(2)} ms</p>
                                     <p>Average Worker Time: ${avgWorkerTime.toFixed(2)} ms</p>
                                     <p>Max Single Worker Time: ${maxWorkerTime.toFixed(2)} ms</p>
-                                    <p>Total Matrices Multiplied: ${workerResults.length}</p>
+                                    <p>Total Tiles : ${workerResults.length}</p>
                                 `;
 
                                 // Cleanup workers
