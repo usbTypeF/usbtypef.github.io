@@ -1,0 +1,433 @@
+<html><head><base href="." />
+<title>GPU-Powered Mandelbrot Explorer</title>
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    background: #000;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    color: #fff;
+}
+
+#controls {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
+    background: rgba(0,0,0,0.7);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+button {
+    background: #444;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    margin: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #666;
+}
+
+canvas {
+    width: 100vw;
+    height: 100vh;
+}
+
+#stats {
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+.slider-container {
+    margin: 10px 0;
+}
+
+input[type="range"] {
+    width: 200px;
+    margin-right: 10px;
+}
+
+label {
+    display: inline-block;
+    width: 120px;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
+</head>
+<body>
+<div id="controls">
+    <button id="renderBtn">Render High Quality Image</button>
+    <div class="slider-container">
+        <label for="iterSlider">Iterations:</label>
+        <input type="range" id="iterSlider" min="128" max="1024" value="128" step="64">
+        <span id="iterValue">128</span>
+    </div>
+    <div class="slider-container">
+        <label for="ssSlider">Max Super Sampling:</label>
+        <input type="range" id="ssSlider" min="1" max="32" value="8" step="1">
+        <span id="ssMaxValue">8</span>
+    </div>
+    <div id="stats">
+        <div>Current Iterations: <span id="currentIter">128</span></div>
+        <div>Super Sampling: <span id="currentSS">1</span>x</div>
+        <div>Position: <span id="position">-0.5, 0</span></div>
+        <div>Zoom: <span id="zoomLevel">0.5</span>x</div>
+    </div>
+    <div>Drag to pan, mousewheel to zoom</div>
+</div>
+<canvas id="glCanvas"></canvas>
+
+<script type="text/javascript">
+const vertexShaderSource = `#version 300 es
+in vec4 position;
+void main() {
+    gl_Position = position;
+}`;
+
+const fragmentShaderSource = `#version 300 es
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+    precision highp float;
+#else
+    precision mediump float;
+#endif
+
+uniform vec2 resolution;
+uniform vec2 center;
+uniform float zoom;
+uniform int maxIterations;
+uniform int superSampling;
+out vec4 fragColor;
+
+vec2 cmul(vec2 a, vec2 b) {
+    return vec2(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
+}
+
+vec3 hsv2rgb(vec3 c) {
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+float mandelbrot(vec2 c) {
+    vec2 z = vec2(0.0);
+    
+    for(int i = 0; i < maxIterations; i++) {
+        z = cmul(z, z) + c;
+        if(dot(z, z) > 4.0) {
+            return float(i) / float(maxIterations);
+        }
+    }
+    return 0.0;
+}
+
+void main() {
+    vec2 uv = gl_FragCoord.xy / resolution.xy;
+    uv = uv * 2.0 - 1.0;
+    uv.x *= resolution.x / resolution.y;
+    
+    float pixel = 0.0;
+    float ss = float(superSampling);
+    
+    for(int i = 0; i < superSampling; i++) {
+        for(int j = 0; j < superSampling; j++) {
+            vec2 offset = vec2(float(i), float(j)) / (ss * resolution.xy);
+            vec2 c = (uv + offset) / zoom + center;
+            pixel += mandelbrot(c);
+        }
+    }
+    pixel /= float(superSampling * superSampling);
+    
+    vec3 color = hsv2rgb(vec3(pixel * 0.5, 1.0, pixel > 0.0 ? 1.0 : 0.0));
+    fragColor = vec4(color, 1.0);
+}`;
+
+class MandelbrotViewer {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.gl = canvas.getContext('webgl2');
+        if (!this.gl) {
+            throw new Error('WebGL 2 not available');
+        }
+
+        try {
+            this.program = this.createProgram();
+            if (!this.program) {
+                throw new Error('Failed to create WebGL program');
+            }
+
+            this.buffer = this.createScreenQuad();
+            this.resolutionLocation = this.gl.getUniformLocation(this.program, 'resolution');
+            this.centerLocation = this.gl.getUniformLocation(this.program, 'center');
+            this.zoomLocation = this.gl.getUniformLocation(this.program, 'zoom');
+            this.maxIterationsLocation = this.gl.getUniformLocation(this.program, 'maxIterations');
+            this.superSamplingLocation = this.gl.getUniformLocation(this.program, 'superSampling');
+            
+            this.center = [new Decimal('-0.5'), new Decimal('0')];
+            this.zoom = new Decimal('0.5');
+            this.isDragging = false;
+            this.lastMousePos = [0, 0];
+            this.currentSuperSampling = 1;
+            this.isAnimating = false;
+            this.maxIterations = 128;
+            this.maxSuperSampling = 8;
+
+            this.setupEventListeners();
+            this.resize();
+            this.startProgressiveRender();
+            this.updateStats();
+        } catch (error) {
+            console.error('Error initializing WebGL:', error);
+            alert('Failed to initialize WebGL: ' + error.message);
+            throw error;
+        }
+    }
+
+    updateStats() {
+        document.getElementById('currentIter').textContent = this.maxIterations;
+        document.getElementById('currentSS').textContent = this.currentSuperSampling;
+        document.getElementById('position').textContent = 
+            `${this.center[0].toExponential(6)}, ${this.center[1].toExponential(6)}`;
+        document.getElementById('zoomLevel').textContent = this.zoom.toExponential(6);
+    }
+
+    createShader(type, source) {
+        const shader = this.gl.createShader(type);
+        this.gl.shaderSource(shader, source);
+        this.gl.compileShader(shader);
+        
+        if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+            const info = this.gl.getShaderInfoLog(shader);
+            this.gl.deleteShader(shader);
+            throw new Error('Shader compile error: ' + info);
+        }
+        
+        return shader;
+    }
+
+    createProgram() {
+        const vertexShader = this.createShader(this.gl.VERTEX_SHADER, vertexShaderSource);
+        if (!vertexShader) {
+            throw new Error('Failed to create vertex shader');
+        }
+
+        const fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, fragmentShaderSource);
+        if (!fragmentShader) {
+            this.gl.deleteShader(vertexShader);
+            throw new Error('Failed to create fragment shader');
+        }
+        
+        const program = this.gl.createProgram();
+        this.gl.attachShader(program, vertexShader);
+        this.gl.attachShader(program, fragmentShader);
+        this.gl.linkProgram(program);
+        
+        this.gl.deleteShader(vertexShader);
+        this.gl.deleteShader(fragmentShader);
+        
+        if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
+            const info = this.gl.getProgramInfoLog(program);
+            this.gl.deleteProgram(program);
+            throw new Error('WebGL program linking error: ' + info);
+        }
+        
+        return program;
+    }
+
+    createScreenQuad() {
+        const positions = new Float32Array([
+            -1, -1,
+            1, -1,
+            -1, 1,
+            1, 1
+        ]);
+        
+        const buffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, positions, this.gl.STATIC_DRAW);
+        
+        const vao = this.gl.createVertexArray();
+        this.gl.bindVertexArray(vao);
+        
+        const positionLocation = this.gl.getAttribLocation(this.program, 'position');
+        this.gl.enableVertexAttribArray(positionLocation);
+        this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
+        
+        return vao;
+    }
+
+    setupEventListeners() {
+        this.canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
+        this.canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
+        this.canvas.addEventListener('mouseup', this.onMouseUp.bind(this));
+        this.canvas.addEventListener('wheel', this.onWheel.bind(this));
+        window.addEventListener('resize', this.resize.bind(this));
+    }
+
+    resize() {
+        const dpr = window.devicePixelRatio;
+        const width = this.canvas.clientWidth * dpr;
+        const height = this.canvas.clientHeight * dpr;
+        
+        this.canvas.width = width;
+        this.canvas.height = height;
+        this.gl.viewport(0, 0, width, height);
+        
+        this.render(this.maxIterations, 1);
+        this.startProgressiveRender();
+    }
+
+    render(iterations = 128, superSampling = 1) {
+        this.gl.useProgram(this.program);
+        this.gl.bindVertexArray(this.buffer);
+        
+        this.gl.uniform2f(this.resolutionLocation, this.canvas.width, this.canvas.height);
+        this.gl.uniform2f(this.centerLocation, parseFloat(this.center[0]), parseFloat(this.center[1]));
+        this.gl.uniform1f(this.zoomLocation, parseFloat(this.zoom));
+        this.gl.uniform1i(this.maxIterationsLocation, iterations);
+        this.gl.uniform1i(this.superSamplingLocation, superSampling);
+        
+        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+        this.updateStats();
+    }
+
+    startProgressiveRender() {
+        if (this.isDragging) return;
+        
+        const renderFrame = () => {
+            if (!this.isDragging && !this.isAnimating) {
+                this.currentSuperSampling = Math.min(this.maxSuperSampling, this.currentSuperSampling + 1);
+                this.render(this.maxIterations, this.currentSuperSampling);
+                
+                if (this.currentSuperSampling < this.maxSuperSampling) {
+                    requestAnimationFrame(renderFrame);
+                }
+            }
+        };
+        
+        this.currentSuperSampling = 1;
+        requestAnimationFrame(renderFrame);
+    }
+
+    onMouseDown(event) {
+        this.isDragging = true;
+        this.lastMousePos = [event.clientX, event.clientY];
+    }
+
+    onMouseMove(event) {
+        if (!this.isDragging) return;
+        
+        const dx = event.clientX - this.lastMousePos[0];
+        const dy = event.clientY - this.lastMousePos[1];
+        
+        const scale = new Decimal('2.0').div(this.zoom).div(Math.min(this.canvas.width, this.canvas.height));
+        this.center[0] = this.center[0].minus(scale.times(dx));
+        this.center[1] = this.center[1].plus(scale.times(dy));
+        
+        this.lastMousePos = [event.clientX, event.clientY];
+        this.render(128, 1);
+    }
+
+    onMouseUp() {
+        this.isDragging = false;
+        this.startProgressiveRender();
+    }
+
+    onWheel(event) {
+        event.preventDefault();
+        const factor = new Decimal(event.deltaY > 0 ? '0.9' : '1.1');
+        this.zoom = this.zoom.times(factor);
+        
+        this.zoom = Decimal.max(new Decimal('1e-100'), Decimal.min(new Decimal('1e100'), this.zoom));
+        
+        this.render(128, 1);
+        
+        this.isAnimating = true;
+        clearTimeout(this.zoomTimeout);
+        this.zoomTimeout = setTimeout(() => {
+            this.isAnimating = false;
+            this.startProgressiveRender();
+        }, 250);
+    }
+
+    downloadHighQualityImage() {
+        const originalWidth = this.canvas.width;
+        const originalHeight = this.canvas.height;
+        
+        this.canvas.width = originalWidth * 4;
+        this.canvas.height = originalHeight * 4;
+        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.render(512, 8);
+        
+        const dataURL = this.canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = 'mandelbrot.png';
+        link.href = dataURL;
+        link.click();
+        
+        this.canvas.width = originalWidth;
+        this.canvas.height = originalHeight;
+        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        
+        setTimeout(() => {
+            this.render(this.maxIterations, 1);
+            this.startProgressiveRender();
+        }, 100);
+    }
+
+    setMaxIterations(iterations) {
+        this.maxIterations = iterations;
+        this.render(this.maxIterations, 1);
+        this.startProgressiveRender();
+    }
+
+    setMaxSuperSampling(value) {
+        this.maxSuperSampling = value;
+        this.currentSuperSampling = 1;
+        this.startProgressiveRender();
+    }
+}
+
+// Initialize the viewer when the page loads
+let viewer;
+window.onload = () => {
+    const canvas = document.getElementById('glCanvas');
+    try {
+        viewer = new MandelbrotViewer(canvas);
+        
+        document.getElementById('renderBtn').onclick = () => {
+            viewer.downloadHighQualityImage();
+        };
+
+        const iterSlider = document.getElementById('iterSlider');
+        const iterValue = document.getElementById('iterValue');
+        iterSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            iterValue.textContent = value;
+            viewer.setMaxIterations(value);
+        });
+
+        const ssSlider = document.getElementById('ssSlider');
+        const ssMaxValue = document.getElementById('ssMaxValue');
+        ssSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            ssMaxValue.textContent = value;
+            viewer.setMaxSuperSampling(value);
+        });
+    } catch (error) {
+        console.error('Failed to initialize Mandelbrot viewer:', error);
+        alert('Failed to initialize: ' + error.message);
+    }
+};
+</script>
+</body>
+</html>
