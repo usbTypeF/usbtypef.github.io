@@ -1,0 +1,322 @@
+<html><head><base href="." />
+<title>GPU Benchmark - 1000 Frame Test</title>
+<style>
+  body {
+    margin: 0;
+    background: #111;
+    color: white;
+    font-family: monospace;
+    overflow: hidden;
+  }
+  
+  #stats {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.8);
+    padding: 10px;
+    border-radius: 4px;
+    z-index: 100;
+  }
+
+  #progress-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    text-align: center;
+  }
+
+  #progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #333;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 10px 0;
+  }
+
+  #progress {
+    width: 0%;
+    height: 100%;
+    background: #0f0;
+    transition: width 0.1s;
+  }
+
+  #results {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.9);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <div id="stats">
+    FPS: <span id="fps">0</span><br>
+    Frame Time: <span id="frameTime">0</span>ms<br>
+    Frames: <span id="frameCount">0</span>
+  </div>
+
+  <div id="progress-container">
+    <h2>Benchmark Progress</h2>
+    <div id="progress-bar">
+      <div id="progress"></div>
+    </div>
+    <div id="progress-text">0%</div>
+  </div>
+
+  <div id="results">
+    <h2>Benchmark Complete</h2>
+    <p>Total time: <span id="total-time">0</span>ms</p>
+    <p>Average FPS: <span id="avg-fps">0</span></p>
+    <p>Average Frame Time: <span id="avg-frame-time">0</span>ms</p>
+  </div>
+
+  <canvas id="glCanvas"></canvas>
+
+<script type="text/javascript">
+// Initialize WebGL
+let canvas = document.getElementById('glCanvas');
+
+// Set initial canvas size before transferring control
+canvas.width = window.innerWidth * window.devicePixelRatio;
+canvas.height = window.innerHeight * window.devicePixelRatio;
+
+let gl = canvas.getContext('webgl2', {
+  powerPreference: 'high-performance',
+  desynchronized: true,
+  antialias: false
+});
+
+if (!gl) {
+  alert('WebGL2 not supported');
+  throw new Error('WebGL2 not supported');
+}
+
+// Set initial viewport
+gl.viewport(0, 0, canvas.width, canvas.height);
+
+// Vertex shader program with more complex calculations
+const vsSource = `#version 300 es
+layout(location = 0) in vec4 aPosition;
+layout(location = 1) in vec4 aColor;
+out vec4 vColor;
+uniform float uTime;
+
+float noise(vec2 p) {
+    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+void main() {
+  float angle = uTime * 0.001;
+  float x = aPosition.x;
+  float y = aPosition.y;
+  
+  for(int i = 0; i < 10; i++) {
+    float noise1 = noise(vec2(x * 0.1 + float(i), y * 0.1));
+    float noise2 = noise(vec2(y * 0.1, x * 0.1 + float(i)));
+    
+    float wave = sin(5.0 * angle + x * 10.0 + noise1) * 0.1;
+    float twist = angle * (x * x + y * y) * noise2;
+    
+    x += wave * cos(twist + float(i));
+    y += wave * sin(twist + float(i));
+    
+    float spiral = length(vec2(x, y));
+    float spiralAngle = atan(y, x) + sin(spiral * 5.0 + angle);
+    x = spiral * cos(spiralAngle);
+    y = spiral * sin(spiralAngle);
+  }
+  
+  gl_Position = vec4(x, y, aPosition.z, 1.0);
+  vColor = aColor;
+}`;
+
+// Fragment shader program
+const fsSource = `#version 300 es
+precision highp float;
+in vec4 vColor;
+out vec4 fragColor;
+
+float noise(vec2 p) {
+    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+void main() {
+  vec4 enhancedColor = vColor;
+  vec2 coord = gl_FragCoord.xy;
+  
+  for(int i = 0; i < 5; i++) {
+    float noise1 = noise(coord * 0.01 * float(i));
+    float noise2 = noise(coord * 0.02 * float(i + 1));
+    
+    enhancedColor.rgb *= 1.0 + 0.2 * sin(coord.x * 0.01 * noise1) * cos(coord.y * 0.01 * noise2);
+    enhancedColor.rgb = mix(enhancedColor.rgb, vec3(noise1, noise2, noise1 * noise2), 0.1);
+  }
+  
+  fragColor = enhancedColor;
+}`;
+
+// Create shader program
+function createShader(gl, type, source) {
+  const shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+    return null;
+  }
+  return shader;
+}
+
+const vertexShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
+const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+
+const shaderProgram = gl.createProgram();
+gl.attachShader(shaderProgram, vertexShader);
+gl.attachShader(shaderProgram, fragmentShader);
+gl.linkProgram(shaderProgram);
+
+// Create buffers - increased to 50000 triangles
+const numTriangles = 50000;
+const positions = new Float32Array(numTriangles * 9);
+const colors = new Float32Array(numTriangles * 12);
+
+for (let i = 0; i < numTriangles; i++) {
+  const baseIndex = i * 9;
+  const scale = 0.02;
+  const offsetX = (Math.random() * 2 - 1) * (1 - scale);
+  const offsetY = (Math.random() * 2 - 1) * (1 - scale);
+  
+  const angle1 = Math.random() * Math.PI * 2;
+  const angle2 = angle1 + Math.random() * Math.PI;
+  const angle3 = angle2 + Math.random() * Math.PI;
+  
+  positions[baseIndex] = offsetX;
+  positions[baseIndex + 1] = offsetY;
+  positions[baseIndex + 2] = 0;
+  
+  positions[baseIndex + 3] = offsetX + scale * Math.cos(angle1);
+  positions[baseIndex + 4] = offsetY + scale * Math.sin(angle1);
+  positions[baseIndex + 5] = 0;
+  
+  positions[baseIndex + 6] = offsetX + scale * Math.cos(angle2);
+  positions[baseIndex + 7] = offsetY + scale * Math.sin(angle2);
+  positions[baseIndex + 8] = 0;
+  
+  const colorBase = i * 12;
+  for (let j = 0; j < 3; j++) {
+    colors[colorBase + j * 4] = 0.5 + 0.5 * Math.random();
+    colors[colorBase + j * 4 + 1] = 0.5 + 0.5 * Math.random();
+    colors[colorBase + j * 4 + 2] = 0.5 + 0.5 * Math.random();
+    colors[colorBase + j * 4 + 3] = 1.0;
+  }
+}
+
+const positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+const colorBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+
+const vao = gl.createVertexArray();
+gl.bindVertexArray(vao);
+
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+gl.enableVertexAttribArray(0);
+gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+
+gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+gl.enableVertexAttribArray(1);
+gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 0, 0);
+
+// Performance monitoring
+let startTime = performance.now();
+let lastTime = startTime;
+let frames = 0;
+let totalFrames = 0;
+const MAX_FRAMES = 1000;
+let totalFrameTime = 0;
+
+const fpsElement = document.getElementById('fps');
+const frameTimeElement = document.getElementById('frameTime');
+const trianglesElement = document.getElementById('triangles');
+const frameCountElement = document.getElementById('frameCount');
+const progressElement = document.getElementById('progress');
+const progressTextElement = document.getElementById('progress-text');
+const resultsElement = document.getElementById('results');
+const progressContainer = document.getElementById('progress-container');
+
+function updateStats() {
+  const now = performance.now();
+  const elapsed = now - lastTime;
+  
+  if (elapsed >= 1000) {
+    const fps = Math.round((frames * 1000) / elapsed);
+    fpsElement.textContent = fps;
+    frameTimeElement.textContent = (elapsed / frames).toFixed(2);
+    
+    frames = 0;
+    lastTime = now;
+  }
+}
+
+function updateProgress() {
+  const progress = (totalFrames / MAX_FRAMES) * 100;
+  progressElement.style.width = `${progress}%`;
+  progressTextElement.textContent = `${Math.round(progress)}%`;
+  frameCountElement.textContent = `${totalFrames}/${MAX_FRAMES}`;
+}
+
+function showResults() {
+  const totalTime = performance.now() - startTime;
+  const avgFps = (MAX_FRAMES / (totalTime / 1000)).toFixed(1);
+  const avgFrameTime = (totalTime / MAX_FRAMES).toFixed(2);
+
+  document.getElementById('total-time').textContent = Math.round(totalTime);
+  document.getElementById('avg-fps').textContent = avgFps;
+  document.getElementById('avg-frame-time').textContent = avgFrameTime;
+
+  progressContainer.style.display = 'none';
+  resultsElement.style.display = 'block';
+}
+
+function render(time) {
+  if (totalFrames >= MAX_FRAMES) {
+    showResults();
+    return;
+  }
+
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  
+  gl.useProgram(shaderProgram);
+  gl.bindVertexArray(vao);
+  
+  const timeLocation = gl.getUniformLocation(shaderProgram, 'uTime');
+  gl.uniform1f(timeLocation, time);
+  
+  gl.drawArrays(gl.TRIANGLES, 0, numTriangles * 3);
+  
+  frames++;
+  totalFrames++;
+  updateStats();
+  updateProgress();
+  
+  setTimeout(() => requestAnimationFrame(render), 0);
+}
+
+requestAnimationFrame(render);
+</script>
+</body></html>
