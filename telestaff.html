@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Department List Processor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #d32f2f;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        input[type="file"], input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        input[type="file"]:focus, input[type="number"]:focus, input[type="text"]:focus {
+            border-color: #d32f2f;
+            outline: none;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        button {
+            background-color: #d32f2f;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+        }
+        
+        button:hover {
+            background-color: #b71c1c;
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .status.success {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .status.error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 20px;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .print-content {
+                page-break-inside: avoid;
+            }
+            
+            .header-info {
+                margin-bottom: 20px;
+                padding: 10px;
+                border: 1px solid #333;
+            }
+            
+            .list-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            
+            .list-table th, .list-table td {
+                border: 1px solid #333;
+                padding: 8px;
+                text-align: left;
+            }
+            
+            .list-table th {
+                background-color: #f0f0f0;
+                font-weight: bold;
+            }
+            
+            .highlight {
+                background-color: #ffff99 !important;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .hire-line {
+                border-bottom: 3px solid #000 !important;
+            }
+        }
+        
+        .print-content {
+            display: none;
+        }
+        
+        .print-content.show {
+            display: block;
+        }
+        
+        .header-info {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 2px solid #333;
+            background-color: #f9f9f9;
+        }
+        
+        .header-info div {
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .list-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .list-table th, .list-table td {
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .list-table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        
+        .highlight {
+            background-color: #ffff99;
+        }
+        
+        .hire-line {
+            border-bottom: 3px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fire Department List Processor</h1>
+        
+        <div class="no-print">
+            <div class="form-group">
+                <label for="csvFile">Upload CSV File:</label>
+                <input type="file" id="csvFile" accept=".csv" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="vacancies">Vacancies:</label>
+                    <input type="number" id="vacancies" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="partial">Partial:</label>
+                    <input type="number" id="partial" min="0" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="vr">VR:</label>
+                    <input type="number" id="vr" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="opportunity">Opportunity:</label>
+                    <input type="text" id="opportunity" placeholder="e.g., B1, B3, 17">
+                </div>
+            </div>
+            
+            <button id="processBtn" onclick="processData()">Process List</button>
+            
+            <div id="status" class="status" style="display: none;"></div>
+        </div>
+        
+        <div id="printContent" class="print-content">
+            <!-- Print content will be generated here -->
+        </div>
+    </div>
+
+    <script>
+        let csvData = [];
+        
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                Papa.parse(file, {
+                    header: true,
+                    dynamicTyping: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        csvData = results.data;
+                        showStatus('CSV file loaded successfully!', 'success');
+                        console.log('Loaded data:', csvData);
+                    },
+                    error: function(error) {
+                        showStatus('Error loading CSV file: ' + error.message, 'error');
+                    }
+                });
+            }
+        });
+        
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        function processData() {
+            if (csvData.length === 0) {
+                showStatus('Please upload a CSV file first', 'error');
+                return;
+            }
+            
+            const vacancies = parseInt(document.getElementById('vacancies').value);
+            const partial = parseInt(document.getElementById('partial').value);
+            const vr = parseInt(document.getElementById('vr').value);
+            const opportunity = document.getElementById('opportunity').value.trim();
+            
+            if (isNaN(vacancies) || isNaN(partial) || isNaN(vr)) {
+                showStatus('Please fill in all numeric fields', 'error');
+                return;
+            }
+            
+            // Calculate hiring and forced
+            const listLength = csvData.length;
+            const hiring = Math.min(vacancies - vr, listLength);
+            const forced = Math.max(0, vacancies - vr - listLength);
+            
+            // Calculate hire lines
+            const fullHireLine = hiring - partial;
+            const partialHireLine = hiring;
+            
+            // Generate print content
+            generatePrintContent(vacancies, partial, vr, opportunity, hiring, forced, fullHireLine, partialHireLine);
+            
+            // Show print content and trigger print dialog
+            document.getElementById('printContent').classList.add('show');
+            setTimeout(() => {
+                window.print();
+            }, 100);
+        }
+        
+        function generatePrintContent(vacancies, partial, vr, opportunity, hiring, forced, fullHireLine, partialHireLine) {
+            const now = new Date();
+            const timeDate = now.toLocaleString();
+            
+            let html = `
+                <div class="header-info">
+		    <div>Station: ${opportunity || 'N/A'}</div>
+                    <div>${timeDate}</div>
+                    <div>Hiring: ${hiring}</div>
+		    <div>Forced: ${forced}</div>
+                    <div>Vacancies: ${vacancies}</div>
+                    <div>Partial: ${partial}</div>
+                    <div>VR: ${vr}</div>
+                    <div>List Length: ${csvData.length}</div>
+                </div>
+                
+                <table class="list-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Person</th>
+                            <th>Rank</th>
+                            <th>Last Worked</th>
+                            <th>Shift</th>
+                            <th>Opportunity Factors</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            csvData.forEach((row, index) => {
+                const rowNum = index + 1;
+                
+                // Extract last worked date and shift
+                const opportunityFactors = row['Opportunity Factors'] || '';
+                const lastWorked = extractLastWorkedDate(opportunityFactors);
+                const shift = extractShift(opportunityFactors);
+                const cleanedOpportunityFactors = cleanOpportunityFactors(opportunityFactors);
+                
+                // Check for exact match highlighting
+                const isHighlighted = opportunity && cleanedOpportunityFactors === opportunity;
+                const isFullHireLine = rowNum === fullHireLine;
+                const isPartialHireLine = rowNum === partialHireLine;
+                
+                let rowClass = '';
+                if (isHighlighted) rowClass += ' highlight';
+                if (isFullHireLine || isPartialHireLine) rowClass += ' hire-line';
+                
+                html += `
+                    <tr class="${rowClass}">
+                        <td>${row['#'] || rowNum}</td>
+                        <td>${row['Person'] || ''}</td>
+                        <td>${row['Rank'] || ''}</td>
+                        <td>${lastWorked}</td>
+                        <td>${shift}</td>
+                        <td>${cleanedOpportunityFactors}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('printContent').innerHTML = html;
+        }
+        
+        function extractLastWorkedDate(opportunityFactors) {
+            if (!opportunityFactors) return '';
+            
+            // Look for dates in format like "2024-12-13 2024-10-10 2024-08-29"
+            const dateRegex = /(\d{4}-\d{2}-\d{2})/g;
+            const dates = opportunityFactors.match(dateRegex);
+            
+            if (dates && dates.length > 0) {
+                // Return the first (most recent) date
+                return dates[0];
+            }
+            
+            // Also check for dates in format like "12/21/2018 00:00:00"
+            const altDateRegex = /(\d{2}\/\d{2}\/\d{4})/g;
+            const altDates = opportunityFactors.match(altDateRegex);
+            
+            if (altDates && altDates.length > 0) {
+                return altDates[0];
+            }
+            
+            return '';
+        }
+        
+        function extractShift(opportunityFactors) {
+            if (!opportunityFactors) return 'none';
+            
+            // Look for shift patterns like ",	B,	" or ",	,	C,	"
+            const shiftMatch = opportunityFactors.match(/,\s*([ABC])\s*,/);
+            if (shiftMatch) {
+                return shiftMatch[1];
+            }
+            
+            return '40hr';
+        }
+        
+        function cleanOpportunityFactors(opportunityFactors) {
+            if (!opportunityFactors) return '';
+            
+            let cleaned = opportunityFactors;
+            
+            // Remove dates in format "2024-12-13 2024-10-10 2024-08-29"
+            cleaned = cleaned.replace(/\d{4}-\d{2}-\d{2}(\s+\d{4}-\d{2}-\d{2})*/g, '');
+            
+            // Remove dates in format "12/21/2018 00:00:00"
+            cleaned = cleaned.replace(/\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2}/g, '');
+            
+            // Remove shift letters (A, B, C) that are comma-separated
+            cleaned = cleaned.replace(/,\s*[ABC]\s*,/g, '');
+            
+            // Remove all commas and extra whitespace
+            cleaned = cleaned.replace(/,/g, '');
+            cleaned = cleaned.replace(/\s+/g, ' ');
+            cleaned = cleaned.trim();
+            
+            // Extract only the final opportunity factor (last non-empty segment)
+            const segments = cleaned.split(/\s+/).filter(seg => seg.length > 0);
+            if (segments.length > 0) {
+                return segments[segments.length - 1];
+            }
+            
+            return '';
+        }
+    </script>
+</body>
+</html>
