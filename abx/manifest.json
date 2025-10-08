@@ -1,0 +1,31 @@
+{
+  "tests": [
+    "example.csv",
+    "bit depth.csv",
+    "inversion.csv",
+    "distortion (easy).csv",
+    "highpass (easy).csv",
+    "lowpass (easy).csv",
+    "lossy (easy).csv",
+    "noise (easy).csv",
+    "pitch (easy).csv",
+    "desync (easy).csv",
+    "codecs (easy).csv",
+    "distortion (hard).csv",
+    "highpass (hard).csv",
+    "lowpass (hard).csv",
+    "lossy (hard).csv",
+    "noise (hard).csv",
+    "pitch (hard).csv",
+    "desync (hard).csv",
+    "codecs (hard).csv",
+    "distortion (extreme).csv",
+    "highpass (extreme).csv",
+    "lowpass (extreme).csv",
+    "lossy (extreme).csv",
+    "noise (extreme).csv",
+    "pitch (extreme).csv",
+    "desync (extreme).csv",
+    "codecs (extreme).csv"
+  ]
+}
